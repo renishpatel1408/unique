@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="partner_confirmation_mail_template" model="mail.template">
+        <field name="name">Partner Confirmation Template</field>
+        <field name="model_id" ref="custom_unique.model_res_partner"/>
+        <field name="subject">Partner Confirmation</field>
+        <field name="body_html" type="html">
+            <div style="font-family: Arial, sans-serif; font-size: 14px;">
+                <b><t t-out="ctx.get('boss_name') or ''"/></b>
+                <p>A new Partner has been created and requires your confirmation.</p>
+                <p>
+                    <a t-att-href="ctx.get('partner_link') or ''" target="_blank"
+                       style="background-color:#007bff; color:white; padding:10px 15px; text-decoration:none; border-radius:5px;">
+                        Confirm Partner
+                    </a>
+                </p>
+                <p>Best Regards</p>
+            </div>
+        </field>
+    </record>
+
+    <record id="partner_approved_mail_template" model="mail.template">
+        <field name="name">Partner Approved Template</field>
+        <field name="model_id" ref="custom_unique.model_res_partner"/>
+        <field name="subject">Partner Approved</field>
+        <field name="body_html" type="html">
+            <div style="font-family: Arial, sans-serif; font-size: 14px;">
+                 <b>Hello <t t-out="object.user_id.name"/> ,</b>
+                 <p>Your partner <strong><t t-out="object.name"/> </strong> has been <strong>approved</strong> by <t t-out="ctx.get('boss_name') or ''"/>.</p>
+                 <p>Thank you</p>
+            </div>
+        </field>
+    </record>
+</odoo>
+

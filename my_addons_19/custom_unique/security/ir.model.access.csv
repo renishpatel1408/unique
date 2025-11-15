@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+custom_unique.access_enquiry_lead,access_enquiry_lead,custom_unique.model_enquiry_lead,base.group_user,1,1,1,1
+custom_unique.access_client_department,access_client_department,custom_unique.model_client_department,base.group_user,1,1,1,1
+custom_unique.access_enquiry_department,access_enquiry_department,custom_unique.model_enquiry_department,base.group_user,1,1,1,1
+custom_unique.access_sale_enquiry,access_sale_enquiry,custom_unique.model_sale_enquiry,base.group_user,1,1,1,1
+custom_unique.access_project_estimation_line,access_project_estimation_line,custom_unique.model_project_estimation_line,base.group_user,1,1,1,1
+custom_unique.access_project_employee,access_project_employee,custom_unique.model_project_employee,base.group_user,1,1,1,1

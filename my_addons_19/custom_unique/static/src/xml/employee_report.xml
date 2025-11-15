@@ -1,0 +1,303 @@
+<templates xml:space="preserve">
+    <t t-name="custom_unique.attendance_report">
+        <div style="width: 100%; height: 100%; background-color: white; overflow-x: auto;">
+
+            <!-- No Records Message -->
+            <t t-if="!this.state.attendances || this.state.attendances.length === 0">
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 40px;">
+                    <div style="text-align: center; max-width: 500px;">
+                        <div style="font-size: 48px; color: #cccccc; margin-bottom: 20px;">
+                            <i class="fa fa-file-text-o"/>
+                        </div>
+                        <h3 style="color: #666666; margin-bottom: 15px; font-weight: 600;">
+                            No Records Found
+                        </h3>
+                        <p style="color: #999999; font-size: 16px; line-height: 1.6;">
+                            There are no attendance records to display. Please apply filters to generate the report.
+                        </p>
+                        <div style="margin-top: 25px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #007bff;">
+                            <p style="color: #666666; margin: 0; font-size: 14px;">
+                                <i class="fa fa-info-circle" style="color: #007bff; margin-right: 8px;"/>
+                                Use the filters above to select attendance records and generate your report.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </t>
+
+            <t t-if="this.state.attendances &amp;&amp; this.state.attendances.length > 0">
+                <!-- Filter Information Card -->
+                <div style="margin-bottom: 20px;margin-top: 20px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin-left: 8px; margin-right: 8px;">
+                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                        <i class="fa fa-filter" style="font-size: 20px; color: #007bff; margin-right: 10px;"/>
+                        <h4 style="margin: 0; color: #333; font-weight: 600;">Applied Filters</h4>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                        <!-- Date Range Filter -->
+                        <div style="background-color: white; padding: 12px; border-radius: 6px; border-left: 4px solid #007bff;">
+                            <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                                <i class="fa fa-calendar" style="color: #007bff; margin-right: 8px;"/>
+                                <strong style="color: #555; font-size: 13px;">Date Range:</strong>
+                            </div>
+                            <div style="color: #333; font-size: 14px; margin-left: 24px;">
+                                <t t-if="this.state.wizardData.date_type === 'today'">
+                                    <span><t t-esc="this.formatFilterDate(this.state.wizardData.start_date)"/></span>
+                                </t>
+                                <t t-else="">
+                                    <span>
+                                        <t t-esc="this.formatFilterDate(this.state.wizardData.start_date)"/>
+                                        <strong style="margin: 0 5px;">to</strong>
+                                        <t t-esc="this.formatFilterDate(this.state.wizardData.end_date)"/>
+                                    </span>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Employees Filter -->
+                        <div style="background-color: white; padding: 12px; border-radius: 6px; border-left: 4px solid #28a745;">
+                            <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                                <i class="fa fa-users" style="color: #28a745; margin-right: 8px;"/>
+                                <strong style="color: #555; font-size: 13px;">Employees:</strong>
+                            </div>
+                            <div style="color: #333; font-size: 14px; margin-left: 24px; word-wrap: break-word;">
+                                <t t-esc="this.state.wizardData.employee_names"/>
+                            </div>
+                        </div>
+
+                        <!-- Projects Filter -->
+                        <div style="background-color: white; padding: 12px; border-radius: 6px; border-left: 4px solid #ffc107;">
+                            <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                                <i class="fa fa-briefcase" style="color: #ffc107; margin-right: 8px;"/>
+                                <strong style="color: #555; font-size: 13px;">Projects:</strong>
+                            </div>
+                            <div style="color: #333; font-size: 14px; margin-left: 24px; word-wrap: break-word;">
+                                <t t-esc="this.state.wizardData.project_names"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons and Record Count -->
+                <div style="margin-bottom: 20px; text-align: left; display: flex; align-items: center; gap: 15px; margin-left: 8px;">
+                    <button type="button" class="btn btn-primary"
+                            t-on-click="exportReport">
+                        <i class="fa fa-download"/> Export Report
+                    </button>
+                    <div style="display: flex; align-items: center; background-color: #e7f3ff; padding: 8px 15px; border-radius: 6px; border: 1px solid #b3d9ff;">
+                        <i class="fa fa-list" style="color: #007bff; margin-right: 8px;"/>
+                        <span style="color: #333; font-size: 14px;">
+                            Total Records: <strong style="color: #007bff;"><t t-esc="this.state.attendances.length"/></strong>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Scrollable table -->
+                <div style="width: 100%; background-color: white;">
+                    <table class="table table-bordered ml8" style="width: 100%; background-color: white; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background-color: #f0f0f0;">
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">S.No</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Date</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Day</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Project No</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Project Department</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Client Name</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Project Name</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Employee Name</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Designation</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Company</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Sector</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Employee Code</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Employee Department</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Location</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Time In</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Time Out</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Normal</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">1.5 Times</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">2.0 Times</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Total Hrs</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Rate Per Hr</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Sub Total</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Salary Rate Per Hour</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">ST-Salary Sub total</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">CPF</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">LAVY</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Accomodation</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Transportation</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Insurance</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Admin Cost</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Certification / Audit Cost</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Office Rent</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">OH Cost</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Others</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Misc</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; width: 10%; white-space: nowrap; font-weight: bold; text-align: center;">Total Expense</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <t t-set="counter" t-value="1"/>
+                            <t t-foreach="this.state.attendances" t-as="att" t-key="att.id">
+                                <tr>
+                                    <!-- Serial No -->
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;white-space: nowrap;">
+                                        <t t-esc="counter"/>
+                                    </td>
+
+                                    <!-- Attendance Date -->
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;white-space: nowrap;">
+                                        <t t-esc="att.attendance_date? new Date(att.attendance_date + 'T00:00:00+08:00').toLocaleDateString('en-GB', { timeZone: 'Asia/Singapore' }): ''"/>
+                                    </td>
+
+                                    <!-- Attendance Day -->
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;white-space: nowrap;">
+                                        <t t-esc="att.attendance_day"/>
+                                    </td>
+
+                                    <!-- Project No -->
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;white-space: nowrap;">
+                                        <t t-esc="att.project_ref"/>
+                                    </td>
+
+                                    <!-- Department -->
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;white-space: nowrap;">
+                                        <t t-esc="att.enquiry_department_code ? att.enquiry_department_code : '-'"/>
+                                    </td>
+
+                                    <!-- Client -->
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;white-space: nowrap;">
+                                        <t t-esc="att.client_id ? att.client_id[1] : '-'"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;white-space: nowrap;">
+                                        <t t-esc="att.vessel_name ? att.vessel_name : '-'"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;white-space: nowrap;">
+                                        <t t-esc="att.employee_id ? att.employee_id[1] : '-'"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;white-space: nowrap;">
+                                        <t t-esc="att.designation_id ? att.designation_id[1] : '-'"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;white-space: nowrap;">
+                                        <t t-esc="att.company_code ? att.company_code : '-'"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;white-space: nowrap;">
+                                        <t t-esc="att.sector ? att.sector : '-'"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;white-space: nowrap;">
+                                        <t t-esc="att.employee_code ? att.employee_code : '-'"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;white-space: nowrap;">
+                                        <t t-esc="att.employee_department ? att.employee_department : '-'"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;white-space: nowrap;">
+                                        <t t-esc="att.work_location_id ? att.work_location_id[1] : '-'"/>
+                                    </td>
+
+                                    <!-- Time In -->
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center; white-space: nowrap;">
+                                        <t t-esc="att.check_in ? att.check_in : '-'"/>
+                                    </td>
+
+                                    <!-- Time Out - 24-hour format without AM/PM -->
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center; white-space: nowrap;">
+                                         <t t-esc="att.check_out ? att.check_out : '-'"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center; white-space: nowrap;">
+                                        <t t-esc="this.formatHours(att.normal_hour)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center; white-space: nowrap;">
+                                        <t t-esc="this.formatHours(att.weekday_overtime_hours)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center; white-space: nowrap;">
+                                        <t t-esc="this.formatHours(att.weekend_overtime_hours)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center; white-space: nowrap;">
+                                        <t t-esc="this.formatHours(att.worked_hours)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;white-space: nowrap;">
+                                        <t t-esc="this.formatCurrency(att.rate_per_hour)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;white-space: nowrap;">
+                                        <t t-esc="this.formatCurrency(att.total_hours_amount)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;white-space: nowrap;">
+                                        <t t-esc="this.formatCurrency(att.salary_rate_per_hour)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;white-space: nowrap;">
+                                        <t t-esc="this.formatCurrency(att.st_salary_total_hour)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;white-space: nowrap;">
+                                        <t t-esc="this.formatCurrency(att.cpf_amount)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;white-space: nowrap;">
+                                        <t t-esc="this.formatCurrency(att.levy_amount)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;white-space: nowrap;">
+                                        <t t-esc="this.formatCurrency(att.accomodation_amount)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;white-space: nowrap;">
+                                        <t t-esc="this.formatCurrency(att.transportation_amount)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;white-space: nowrap;">
+                                        <t t-esc="this.formatCurrency(att.insurance_amount)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;white-space: nowrap;">
+                                        <t t-esc="this.formatCurrency(att.admin_cost_amount)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;white-space: nowrap;">
+                                        <t t-esc="this.formatCurrency(att.certification_audit_cost_amount)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;white-space: nowrap;">
+                                        <t t-esc="this.formatCurrency(att.office_rent_amount)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;white-space: nowrap;">
+                                        <t t-esc="this.formatCurrency(att.oh_cost_amount)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;white-space: nowrap;">
+                                        <t t-esc="this.formatCurrency(att.others_cost_amount)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;white-space: nowrap;">
+                                        <t t-esc="this.formatCurrency(att.misc_amount)"/>
+                                    </td>
+
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;white-space: nowrap;">
+                                        <t t-esc="this.formatCurrency(att.total_expense)"/>
+                                    </td>
+                                    <t t-set="counter" t-value="counter + 1"/>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

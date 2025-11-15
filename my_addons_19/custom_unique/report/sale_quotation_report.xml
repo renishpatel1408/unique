@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Custom External Layout with Header and Footer -->
+        <template id="weblearns_layout" name="Weblearns Custom Layout">
+            <t t-call="web.html_container">
+                <t t-set="company" t-value="company or o.company_id"/>
+                <div class="header" style="padding: 10px 0;">
+                    <div class="row align-items-center" style="height:60px;">
+                        <div class="col-3 text-left">
+                            <img t-if="company.logo"
+                                 t-att-src="image_data_uri(company.logo)"
+                                 alt="Company Logo"
+                                 style="max-height: 80px;"/>
+                        </div>
+
+                        <div class="col-9 text-left d-flex align-items-start">
+                            <h1 style="margin: 0; font-weight: bold; text-transform: uppercase; color: red; font-size: 42px;">
+                                <t t-esc="company.name"/>
+                            </h1>
+                        </div>
+                    </div>
+
+                    <div class="row mt16">
+                        <div class="col-12 text-end">
+                            <strong>Company Reg. No:</strong> <span t-field="company.vat"/><br/>
+                            <strong>GST Reg. No:</strong> <span t-field="company.vat"/><br/>
+                        </div>
+                    </div>
+                    <div class="row mt16" style="border-bottom: 2px solid #ff6933;border-top: 2px solid #ff6933;padding: 4px 0;">
+                        <div class="col-12 text-center">
+                            <strong>
+                                <t t-if="company.street"> <t t-esc="company.street"/></t>
+                                <t t-if="company.street2">, <t t-esc="company.street2"/></t>
+                                <t t-if="company.city">, <t t-esc="company.city"/></t>
+                                <t t-if="company.state_id">, <t t-esc="company.state_id.name"/></t>
+                                <t t-if="company.zip"> <t t-esc="company.zip"/>.</t>
+                                Email: <t t-if="company.email"> <t t-esc="company.email"/>.</t>
+                            </strong>
+                            <br/>
+                            <strong>
+                                Website: <t t-if="company.website"> <t t-esc="company.website"/> </t>
+                                Tel: <t t-if="company.phone"> <t t-esc="company.phone"/>,</t>
+                                HP: <t t-if="company.phone"> <t t-esc="company.phone"/>.</t>
+                            </strong>
+                        </div>
+                    </div>
+                    <div class="row mt8">
+                        <div class="col-12 text-end">
+                            <strong>Page</strong> <span class="page"/> / <span class="topage"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BODY -->
+                <div class="article o_report_layout_standard">
+                    <t t-out="0"/>
+                </div>
+
+                <!-- FOOTER -->
+                <div class="footer" style="padding-top: 10px; font-size: 9px;">
+                    <div class="row">
+                        <div class="col-12 mb16 text-end">
+                            <img t-att-src="'/custom_unique/static/src/img/footer.png'"
+                                 alt="Certification Logo"
+                                 style="height: 150px; width: 400px; margin-top: 3px;"/>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <!-- Quotation Report Template -->
+        <template id="report_sale_quotation_infocom" inherit_id="sale.report_saleorder_document">
+            <xpath expr="//t[@t-call='web.external_layout']" position="replace">
+                <t t-call="custom_unique.weblearns_layout">
+                    <t t-set="o" t-value="doc"/>
+                    <t t-set="company" t-value="doc.company_id"/>
+
+                    <div class="page">
+                        <!-- Quotation Title -->
+                        <div class="row" style="margin-top: 15px;">
+                            <div class="col-12 text-center">
+                                <h4 style="margin: 0 auto; font-weight: bold; text-transform: uppercase; display: inline-block; border-bottom: 2px solid #000; padding-bottom: 5px;">
+                                    <t t-if="doc.state == 'draft'">Quotation</t>
+                                    <t t-elif="doc.state == 'sale'">Sale Quotation</t>
+                                    <t t-elif="doc.state == 'cancel'">Cancelled</t>
+                                    <t t-elif="doc.state == 'approved'">Quotation Approved</t>
+                                </h4>
+                            </div>
+                        </div>
+
+
+                        <div class="row mt24" style="padding: 6px 0;">
+                            <div class="col-7 text-left">
+                                <strong>Date:</strong>
+                                <t t-set="d" t-value="doc.date_order"/>
+                                <t t-set="day" t-value="int(d.strftime('%d'))"/>
+                                <span t-esc="str(day) + ('th' if 11 &lt;= day &lt;= 13 else {1:'st', 2:'nd', 3:'rd'}.get(day % 10, 'th')) + d.strftime(' %B %Y')"/>
+                                <br/>
+                            </div>
+                            <div class="col-2 text-left">
+                                <strong>Quotation Ref No.<br/></strong>
+                                <strong>Your Ref No.</strong><br/>
+                            </div>
+                            <div class="col-3 text-left">
+                                <strong>:<span t-field="doc.name"/><br/></strong>
+                                <strong>:<span t-field="doc.ref_no"/></strong><br/>
+                            </div>
+                        </div>
+
+                        <div class="row" style="padding: 6px 0;">
+                            <div class="col-12 text-left">
+                                To: Attn: <strong><span t-field="doc.contact_person_id.name"/></strong><br/>
+                            </div>
+                        </div>
+
+                        <div class="row mt8" style="padding: 6px 0;">
+                            <div class="col-12 text-left">
+                                <strong>
+                                    <t t-if="doc.client_id"> <t t-esc="doc.client_id.name"/></t><br/>
+                                </strong>
+                                <t t-if="doc.client_id.street"> <t t-esc="doc.client_id.street"/></t><br/>
+                                <t t-if="doc.client_id.street2"> <t t-esc="doc.client_id.street2"/></t><br/>
+                                <t t-if="doc.client_id.city"> <t t-esc="doc.client_id.city"/></t><br/>
+                                <t t-if="doc.client_id.state_id"> <t t-esc="doc.client_id.state_id.name"/></t>
+                                <t t-if="doc.client_id.zip">, <t t-esc="doc.client_id.zip"/></t><br/>
+                                <t t-if="doc.client_id.email">Email: <t t-esc="doc.client_id.email"/></t><br/>
+                                <t t-if="doc.client_id.phone">Contact No.: <t t-esc="doc.client_id.phone"/></t><br/>
+                            </div>
+                        </div>
+
+                        <div class="row mt16" style="padding: 6px 0;">
+                            <div class="col-12 text-left">
+                                Dear Sir,
+                            </div>
+                        </div>
+
+                        <div class="row mt16" style="padding: 6px 0;">
+                            <div class="col-2 text-left">
+                                <strong>Subject </strong><br/>
+                                <strong>Project Name </strong><br/>
+                                <strong>Location </strong><br/>
+                            </div>
+                            <div class="col-10 text-left">
+                                <strong>: <span t-field="doc.subject"/></strong><br/>
+                                <strong>: <span t-field="doc.project_name"/></strong><br/>
+                                <strong>: <span t-field="doc.location"/></strong><br/>
+                            </div>
+                        </div>
+
+                        <div class="row" style="padding: 6px 0;">
+                            <div class="col-12 text-left">
+                                With regard to the above we thank you for your enquiry and we are pleased to provide our quotation based on the information provided.
+                            </div>
+                        </div>
+
+                        <div class="row" style="padding: 6px 0;">
+                            <div class="col-12 text-left">
+                                Provide Skilled manpower and Insulation Materials, tools to carry out installation of insulation works as follows.
+                            </div>
+                        </div>
+
+                        <!-- PAGINATION FOR ORDER LINES -->
+                        <t t-set="lines_per_page" t-value="4"/>
+                        <t t-set="total_lines" t-value="len(doc.order_line)"/>
+
+                        <t t-foreach="range(0, total_lines, lines_per_page)" t-as="page_start">
+                            <t t-set="page_lines" t-value="doc.order_line[page_start:page_start + lines_per_page]"/>
+                            <t t-set="is_first" t-value="page_start == 0"/>
+
+                            <t t-if="not is_first">
+                                <div style="page-break-before: always;"></div>
+                            </t>
+
+                            <!-- SYSTEM / SCOPE repeated at top of each page -->
+                            <div class="row" style="padding: 6px 0;">
+                                <div class="col-12 text-left">
+                                    <strong>System: <span t-field="doc.system"/></strong><br/>
+                                </div>
+                            </div>
+
+                            <div class="row" style="padding: 6px 0; margin-bottom:6px;">
+                                <div class="col-12 text-left">
+                                    <strong>Scope of Bellow, Bend, Flange:</strong> <span t-field="doc.scope"/><br/>
+                                </div>
+                            </div>
+
+                            <!-- ORDER LINES TABLE -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <table class="table table-sm" style="margin-top: 6px; text-align: center; width: 100%; border-collapse: collapse; border: 1px solid black;">
+                                        <thead style="display: table-header-group;">
+                                            <tr style="background-color: #f0f0f0; font-weight: bold;">
+                                                <th style="width: 15%; text-align: center; border: 1px solid black;">SN</th>
+                                                <th style="width: 25%; text-align: center; border: 1px solid black;">Service</th>
+                                                <th style="width: 15%; text-align: center; border: 1px solid black;">Qty</th>
+                                                <th style="width: 15%; text-align: center; border: 1px solid black;">UOM</th>
+                                                <th style="width: 15%; text-align: center; border: 1px solid black;">Amount Quotated</th>
+                                                <th style="width: 15%; text-align: center; border: 1px solid black;">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr t-foreach="enumerate(page_lines, start=page_start + 1)" t-as="item">
+                                                <td style="border: 1px solid black; text-align: center;"><span t-esc="item[0]"/></td>
+                                                <td style="border: 1px solid black; text-align: left;"><span t-field="item[1].product_id.name"/></td>
+                                                <td style="border: 1px solid black; text-align: center;"><span t-field="item[1].product_uom_qty"/></td>
+                                                <td style="border: 1px solid black; text-align: center;"><span t-field="item[1].uom_id.name"/></td>
+                                                <td style="border: 1px solid black; text-align: right; padding-right: 2px;"><span t-field="item[1].price_unit"/></td>
+                                                <td style="border: 1px solid black; text-align: right; padding-right: 2px;"><span t-field="item[1].price_subtotal"/></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- TOTAL / DISCOUNT / GST / NET AMOUNT -->
+                        <div class="row" style="padding: 6px 0; margin-top: 12px;">
+                            <div class="col-12 text-right">
+                                <table style="width: 40%; float: right; border-collapse: collapse;page-break-inside: avoid;">
+                                    <tbody>
+                                        <tr>
+                                            <td style="text-align: right; font-weight: bold; border: 1px solid black; padding-right: 2px;">Total:</td>
+                                            <td style="text-align: right; border: 1px solid black; padding-right: 2px;"><span t-field="doc.service_amount"/></td>
+                                        </tr>
+                                        <t t-if="doc.discount_amt &gt; 0">
+                                            <tr>
+                                                <td style="text-align: right; font-weight: bold; border: 1px solid black; padding-right: 2px;">
+                                                    <t t-if="doc.discount_type == 'percent'">Discount <span t-esc="doc.discount_percent"/>%:</t>
+                                                    <t t-elif="doc.discount_type == 'amount'">Discount:</t>
+                                                </td>
+                                                <td style="text-align: right; border: 1px solid black; padding-right: 2px;"><span t-field="doc.discount_amt"/></td>
+                                            </tr>
+                                            <tr t-if="doc.amount_after_discount">
+                                                <td style="text-align: right; font-weight: bold; border: 1px solid black; padding-right: 2px;">Less Discount:</td>
+                                                <td style="text-align: right; border: 1px solid black; padding-right: 2px;"><span t-field="doc.amount_after_discount"/></td>
+                                            </tr>
+                                        </t>
+                                        <t t-if="doc.gst_type == 'gst_9' and doc.gst_amount &gt; 0">
+                                            <tr>
+                                                <td style="text-align: right; font-weight: bold; border: 1px solid black; padding-right: 2px;">GST 9%:</td>
+                                                <td style="text-align: right; border: 1px solid black; padding-right: 2px;"><span t-field="doc.gst_amount"/></td>
+                                            </tr>
+                                        </t>
+                                        <tr>
+                                            <td style="text-align: right; font-weight: bold; border: 1px solid black; padding-right: 2px;">Net Amount:</td>
+                                            <td style="text-align: right; border: 1px solid black; padding-right: 2px;"><span t-field="doc.net_amount"/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- TERMS & SIGNATURES (unchanged) -->
+                        <div class="row mt16" style="page-break-inside: avoid;">
+                            <div class="col-12 text-left">
+                                <strong style="margin: 0 auto; font-weight: bold; display: inline-block; border-bottom: 2px solid #000; padding-bottom: 5px; white-space: nowrap;">
+                                    Terms &amp; Conditions
+                                </strong><br/>
+                                <ul>
+                                    <li><span t-field="doc.note"/></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="row mt16" style="padding: 6px 0; page-break-inside: avoid;">
+                            <div class="col-7 text-left">
+                                <strong>Thanks, and best regards, </strong>
+                            </div>
+                            <div class="col-5 text-left">
+                                <strong>Agreed By: -</strong><span t-field="doc.user_id.name"/>
+                            </div>
+                        </div>
+
+                        <div class="row mt8" style="padding: 6px 0; page-break-inside: avoid;">
+                            <div class="col-7 text-left">
+                                <t t-set="boss_users" t-value="env['res.users'].search([('is_boss', '=', True)])"/>
+                                <strong>
+                                    <t t-if="boss_users.name"> <t t-esc="boss_users.name"/></t><br/>
+                                    Director<br/>
+                                    <t t-if="doc.company_id"> <t t-esc="doc.company_id.name"/></t><br/>
+                                    Email: <t t-if="boss_users.email"> <t t-esc="boss_users.email"/></t><br/>
+                                    H/P: <t t-if="boss_users.phone"> <t t-esc="boss_users.phone"/></t><br/>
+                                    Office: <t t-if="boss_users.phone"> <t t-esc="boss_users.phone"/></t>
+                                </strong>
+                            </div>
+                            <div class="col-5 text-left">
+                                <strong>Purchase Order No.: -</strong>
+                            </div>
+                        </div>
+
+                        <div class="row mt8" style="border-top: 2px solid; page-break-inside: avoid;">
+                            <div class="col-12 mt8 text-left">
+                                <strong>General Commercial Terms &amp; Conditions </strong><br/><br/>
+                                <strong>a) Terms of Business:</strong><br/>
+                                As per this General Commercial Terms and Conditions.<br/>
+                                <strong>b) Terms of Payment:</strong><br/>
+                                COD from the date of our Invoice submission.<br/>
+                                <strong>c) Validity of Quotation:</strong><br/>
+                                14 days from date of quotation.<br/>
+                                <strong>d) Scope:</strong><br/>
+                                Any works not mentioned above is at additional cost to be advised prior to commencement of works.<br/>
+                                <strong>e) Currency Quoted:</strong><br/>
+                                Singapore Dollars.<br/>
+                                <strong>f) GST:</strong> 9% Applicable.
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </xpath>
+        </template>
+    </data>
+</odoo>

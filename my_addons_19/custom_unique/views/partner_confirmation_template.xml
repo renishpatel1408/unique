@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <template id="partner_confirmation_template" name="Confimation Partner">
+            <t t-call="website.layout">
+                <t t-setet="no_breadcrumbs" t-value="True"/>
+
+                <section class="container mt-5 mb-5">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-7 col-md-7 col-sm-12">
+                            <div class="card shadow-lg border-0 rounded-4 p-4">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <t t-set="token" t-value="partner.token"/>
+                                <!-- ===== Title ===== -->
+                                <t t-if="partner.approved_by_boss and not partner.blocked_by_boss">
+                                    <div class="alert alert-success text-center fw-bold mb-4 rounded-3 shadow-sm">
+                                        Partner is already approved.
+                                    </div>
+                                </t>
+
+                                <t t-if="partner.blocked_by_boss and not partner.approved_by_boss">
+                                    <div class="alert alert-danger text-center fw-bold mb-4 rounded-3 shadow-sm">
+                                        Partner is already blocked.
+                                    </div>
+                                </t>
+
+                                <h3 class="text-center text-primary mb-4 fw-bold">
+                                    <t t-esc="'Partner Confirmation'"/>
+                                </h3>
+
+
+                                <div class="row">
+                                    <div class="col-lg-12 mb-3">
+                                        <label class="fw-bold mb-2">Name</label>
+                                        <input type="text" class="form-control input-border input-color"
+                                               t-att-value="partner.name or ''" readonly="readonly"/>
+                                    </div>
+
+
+                                    <!-- Email -->
+                                    <div class="col-lg-12 mb-3">
+                                        <label class="fw-bold mb-2">Email</label>
+                                        <input type="text" class="form-control input-border input-color"
+                                               t-att-value="partner.email or ''" readonly="readonly"/>
+                                    </div>
+
+                                    <!-- Contact -->
+                                    <div class="col-lg-12 mb-3">
+                                        <label class="fw-bold mb-2">Phone</label>
+                                        <input type="text" class="form-control input-border input-color"
+                                               t-att-value="partner.phone or ''" readonly="readonly"/>
+                                    </div>
+                                    <t t-if="partner.street">
+                                        <div class="col-lg-12 mb-3">
+                                            <label class="fw-bold mb-2">Street</label>
+                                            <input type="text" class="form-control input-border input-color"
+                                                   t-att-value="partner.street" readonly="readonly"/>
+                                        </div>
+                                    </t>
+
+                                    <t t-if="partner.street2">
+                                        <div class="col-lg-12 mb-3">
+                                            <label class="fw-bold mb-2">Street2</label>
+                                            <input type="text" class="form-control input-border input-color"
+                                                   t-att-value="partner.street2" readonly="readonly"/>
+                                        </div>
+                                    </t>
+
+                                    <t t-if="partner.city">
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="fw-bold mb-2">City</label>
+                                            <input type="text" class="form-control input-border input-color"
+                                                   t-att-value="partner.city" readonly="readonly"/>
+                                        </div>
+                                    </t>
+
+                                    <t t-if="partner.state_id">
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="fw-bold mb-2">State</label>
+                                            <input type="text" class="form-control input-border input-color"
+                                                   t-att-value="partner.state_id.name" readonly="readonly"/>
+                                        </div>
+                                    </t>
+
+                                    <t t-if="partner.zip">
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="fw-bold mb-2">Zip</label>
+                                            <input type="text" class="form-control input-border input-color"
+                                                   t-att-value="partner.zip" readonly="readonly"/>
+                                        </div>
+                                    </t>
+
+                                    <t t-if="partner.country_id">
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="fw-bold mb-2">Country</label>
+                                            <input type="text" class="form-control input-border input-color"
+                                                   t-att-value="partner.country_id.name" readonly="readonly"/>
+                                        </div>
+                                    </t>
+
+                                    <t t-if="partner.user_id">
+                                        <div class="col-lg-12 mb-3">
+                                            <label class="fw-bold mb-2">Sale Person</label>
+                                            <input type="text" class="form-control input-border input-color"
+                                                   t-att-value="partner.user_id.name" readonly="readonly"/>
+                                        </div>
+                                    </t>
+                                    <t t-if="partner.user_id">
+                                        <div class="col-lg-12 mb-3">
+                                            <label class="fw-bold mb-2">Company</label>
+                                            <input type="text" class="form-control input-border input-color" t-att-value="partner.company_id.name" readonly="readonly"/>
+                                        </div>
+                                    </t>
+                                    <t t-if="partner.user_id">
+                                        <div class="col-lg-12 mb-3">
+                                            <label class="fw-bold mb-2">Sector</label>
+                                            <input type="text" class="form-control input-border input-color" t-att-value="dict(partner._fields['sector'].selection).get(partner.sector)" readonly="readonly"/>
+                                        </div>
+                                    </t>
+                                    <t t-if="partner.user_id">
+                                        <div class="col-lg-12 mb-3">
+                                            <label class="fw-bold mb-2">Create Date</label>
+                                            <input type="text" class="form-control input-border input-color"
+                                                   t-att-value="partner.create_date" readonly="readonly"/>
+                                        </div>
+                                    </t>
+                                </div>
+
+                                <t t-if="not partner.approved_by_boss and not partner.blocked_by_boss">
+                                    <div class="mt16 pt-3">
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input custom-radio" type="radio" name="action_selection" value="approve" id="approve_radio"/>
+                                                <label class="form-check-label fw-medium" for="approve_radio">To approved the enquiry, select <strong>Approve</strong>.</label>
+                                            </div>
+
+                                            <div class="form-check mt-2">
+                                                <input class="form-check-input custom-radio" type="radio" name="action_selection" value="block" id="block_radio"/>
+                                                <label class="form-check-label fw-medium" for="block_radio">To blocked the enquiry, select <strong>Block</strong>.</label>
+                                            </div>
+                                        </div>
+
+                                        <!-- Action Buttons -->
+                                        <div id="action_buttons" class="text-center mt-3">
+                                            <button t-att-data-token="token" id="approve_btn"
+                                                    class="btn btn-success px-4 py-2 rounded-3 d-none">
+                                                Approve
+                                            </button>
+                                            <button t-att-data-token="token" id="block_btn"
+                                                    class="btn btn-danger px-4 py-2 rounded-3 d-none">
+                                                Block
+                                            </button>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== Custom Styles ===== -->
+                <style>
+                    .input-border {
+                        border-radius: 6px !important;
+                        background-color: #fff !important;
+                    }
+
+                    .input-color {
+                        color: #212529 !important;
+                        font-weight: 400;
+                        text-align: left !important;
+                    }
+                    header, footer {
+                        display: none !important;
+                    }
+                    .custom-radio {
+                        border: 1px solid #212529 !important;
+                    }
+                    .info_title{
+                        color: blue;
+                    }
+
+                </style>
+
+                <!-- jQuery Script -->
+            </t>
+        </template>
+
+<!--        <template id="layout_no_header_footer" inherit_id="website.layout">-->
+<!--            <xpath expr="//header" position="replace"/>-->
+<!--            <xpath expr="//footer" position="replace"/>-->
+<!--        </template>-->
+
+    </data>
+</odoo>

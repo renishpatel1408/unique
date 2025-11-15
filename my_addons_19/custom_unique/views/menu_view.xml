@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <menuitem id="menu_unique_root" name="Unique" sequence="1"/>
+
+    <menuitem id="menu_enquiry_lead" name="Lead" parent="menu_unique_root" sequence="1" action="action_enquiry_lead"/>
+
+    <menuitem id="menu_contact" name="Contacts" parent="menu_unique_root" sequence="0" action="contacts.action_contacts"/>
+
+    <menuitem id="menu_sales_enquiry" name="Enquiry" parent="menu_unique_root" action="action_sale_enquiry"  sequence="2"/>
+
+    <menuitem id="menu_sale" name="Sale" parent="menu_unique_root" sequence="3"/>
+
+     <menuitem id="menu_sale_quotation" name="Quotations" parent="menu_sale" action="sale.action_quotations_with_onboarding" sequence="0"/>
+
+     <menuitem id="menu_sale_order" name="Order" parent="menu_sale" action="sale.action_orders" sequence="1"/>
+
+     <menuitem id="menu_gom_project" name="Project" parent="menu_unique_root" sequence="4" action="project.open_view_project_all"/>
+
+    <menuitem id="menu_infocom_configuration" name="Configuration" parent="menu_unique_root" sequence="99"/>
+
+    <menuitem id="enquiry_department_menu" name="Department" parent="menu_infocom_configuration" sequence="50" action="action_enquiry_department" groups="base.group_system"/>
+
+    <menuitem id="client_department_menu" name="Client Department" parent="menu_infocom_configuration" sequence="60" action="action_client_department" groups="base.group_system"/>
+</odoo>

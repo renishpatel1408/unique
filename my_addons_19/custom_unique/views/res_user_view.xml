@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_res_partner_filter_custom" model="ir.ui.view">
+        <field name="name">res.partner.search.custom</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <field name="name" position="replace">
+                <field name="name" string="Name"
+                       filter_domain="[('name', 'ilike', self)]"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_users_form_inherit_is_boss" model="ir.ui.view">
+        <field name="name">res.users.form.inherit.is.boss</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='signature']" position="after">
+                <field name="is_boss"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_partner_form_inherit_address" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.address.fields</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='vat']" position="before">
+                <field name="create_date" widget="datetime" options="{'numeric': true }"/>
+            </xpath>
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="create_uid"/>
+            </xpath>
+            <xpath expr="//div[@class='o_address_format']" position="after">
+                <field name="sector" required="1"/>
+                <field name="user_id" required="1"/>
+                <field name="company_id" required="1"/>
+                <field name="confirmation_state" readonly="1"/>
+                <field name="approval_date" widget="datetime" options="{'numeric': true }"/>
+                <field name="block_date" widget="datetime" options="{'numeric': true }"/>
+                <field name="approved_by_boss" invisible="0"/>
+                <field name="blocked_by_boss" invisible="0"/>
+            </xpath>
+        </field>
+    </record>
+
+     <record id="view_res_partner_search_inherit_state" model="ir.ui.view">
+        <field name="name">res.partner.search.inherit.state</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <field name="confirmation_state"/>
+
+                <filter string="Approved" name="filter_approved" domain="[('confirmation_state', '=', 'approved')]"/>
+                <filter string="Rejected" name="filter_rejected" domain="[('confirmation_state', '=', 'rejected')]"/>
+            </xpath>
+
+            <!-- Optional: Add to group by section -->
+            <xpath expr="//group[@name='group_by']" position="inside">
+                <filter string="Confirmation Status" name="group_by_confirmation_state" context="{'group_by': 'confirmation_state'}"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_hr_employee_form_inherit_sector_code" model="ir.ui.view">
+        <field name="name">hr.employee.form.inherit.sector.code</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//page[@name='work_information']//group" position="inside">
+                <field name="code"/>
+                <field name="sector"/>
+            </xpath>
+
+             <xpath expr="//div[@name='button_box']" position="inside">
+                <button type="object"
+                        name="action_open_working_days"
+                        class="oe_stat_button"
+                        icon="fa-calendar-check-o">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Working Days</span>
+                    </div>
+                </button>
+             </xpath>
+
+            <xpath expr="//page[@name='work_information']" position="after">
+                <page string="Cost Breakdown">
+                    <group>
+                        <group>
+                            <field name="rate_per_hour"/>
+                            <field name="salary_rate_per_hour"/>
+                            <field name="cpf_amount"/>
+                            <field name="levy_amount"/>
+                            <field name="accomodation_amount"/>
+                            <field name="transportation_amount"/>
+                        </group>
+                        <group>
+                            <field name="insurance_amount"/>
+                            <field name="admin_cost_amount"/>
+                            <field name="certification_audit_cost_amount"/>
+                            <field name="office_rent_amount"/>
+                            <field name="oh_cost_amount"/>
+                            <field name="others_cost_amount"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+
+</odoo>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_project_form_inherit_hide_title" model="ir.ui.view">
+        <field name="name">project.project.form.inherit.hide.title</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/> <!-- Base project form -->
+        <field name="arch" type="xml">
+            <xpath expr="//div[@class='oe_title']" position="replace">
+                <div class="oe_title">
+                    <h1> <field name="name"/> </h1>
+                </div>
+            </xpath>
+
+             <xpath expr="//group[1]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//group[1]" position="after">
+                <group>
+                    <group string="Project Info">
+                        <field name="project_ref"/>
+                        <field name="purchase_id"/>
+                        <field name="sale_order_id" force_save="1"/>
+                        <field name="quotation_date" options="{'numeric': true }"/>
+                        <field name="start_date" options="{'numeric': true }"/>
+                        <field name="end_date" options="{'numeric': true }"/>
+                        <field name="yeard_id"/>
+                        <field name="deadline" widget="datetime" options="{'numeric': true }"/>
+                        <field name="location"/>
+                    </group>
+                    <group string="SalePerson Name">
+                        <field name="company_id"/>
+                        <field name="user_id"/>
+                        <field name="priority"/>
+                        <field name="enq_probability"/>
+                        <field name="sector"/>
+                        <field name="project_complete_percent"/>
+                    </group>
+                </group>
+                <group>
+                    <group string="Customer Name">
+                        <field name="client_id" options="{'no_quick_create': True, 'no_create_edit': False}"/>
+                        <field name="contact_person_id" options="{'no_quick_create': True, 'no_create_edit': False}"/>
+                        <field name="mobile"/>
+                        <field name="email"/>
+                        <field name="department_id"/>
+                        <field name="client_department_id"/>
+                        <field name="ref_no"/>
+                    </group>
+                </group>
+            </xpath>
+
+            <xpath expr="//page[@name='description']" position="before">
+                <page string="Employees" name="employees">
+                    <group>
+                        <field name="employee_ids" nolabel="1">
+                            <list editable="bottom" create="false" delete="false">
+                                <field name="employee_id"/>
+                                <field name="employee_code"/>
+                                <field name="sector"/>
+                                <field name="working_dept"/>
+                                <field name="designation_id"/>
+                                <field name="location"/>
+                                <field name="employee_total_work" readonly="1" widget="float_time"/>
+                            </list>
+                        </field>
+                    </group>
+                </page>
+                <page string="Estimation" name="estimation_line">
+                    <group>
+                        <field name="estimation_line_ids" nolabel="1">
+                            <list editable="bottom" create="false" delete="false">
+                                <field name="working_date" width="100px" options="{'numeric': true }"/>
+                                <field name="estimate_man_hrs" width="120px"/>
+                                <field name="rate_per_hr" width="100px"/>
+                                <field name="est_man_power_cost" width="150px"/>
+                                <field name="est_dia_weight_uom" width="150px"/>
+                                <field name="po_amount" width="100px"/>
+                                <field name="vor_not_approved" width="150px"/>
+                                <field name="total_project_value" width="150px"/>
+                                <field name="total_project_value_2" width="150px"/>
+                                <field name="percent_completed" width="100px"/>
+                                <field name="wip_value" width="100px"/>
+                                <field name="percent_pending" width="100px"/>
+                                <field name="pending_amount" column_invisible="1" width="100px"/>
+                                <field name="expected_closing_date" width="220px" options="{'numeric': true }"/>
+                            </list>
+                        </field>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="project.open_view_project_all" model="ir.actions.act_window">
+         <field name="view_mode">list,form</field>
+        <field name="view_id" ref="project.view_project"/>
+    </record>
+</odoo>

@@ -1,0 +1,100 @@
+<odoo>
+    <record id="hr_attendance_tree_inherit_project" model="ir.ui.view">
+        <field name="name">hr.attendance.tree.inherit.project</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.view_attendance_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='employee_id']" position="before">
+                <field name="attendance_date" string="Date" options="{'numeric': true }"/>
+                <field name="project_id"/>
+                <field name="weekend_overtime_hours" widget="float_time"/>
+                <field name="weekday_overtime_hours" widget="float_time"/>
+            </xpath>
+            <xpath expr="//field[@name='check_out']" position="after">
+                <field name="create_date" column_invisible="1"/>
+            </xpath>
+            <field name="check_in" position="replace">
+                <field name="check_in" widget="datetime" options="{'numeric': true }"/>
+            </field>
+            <field name="check_out" position="replace">
+                <field name="check_out" widget="datetime" options="{'numeric': true }"/>
+            </field>
+             <field name="validated_overtime_hours" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_resource_calendar_form_inherit" model="ir.ui.view">
+        <field name="name">resource.calendar.form.inherit.before.working.time</field>
+        <field name="model">resource.calendar</field>
+        <field name="inherit_id" ref="resource.resource_calendar_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Add our new fields BEFORE the "Working Time / Results / Hours" section -->
+            <xpath expr="//group[@name='resource_working_hours']" position="inside">
+                    <field name="mon_to_fri_hours"/>
+                    <field name="saturday_hours"/>
+            </xpath>
+
+<!--            <field name="hours_per_day" position="replace">-->
+<!--                <field name="hours_per_week"/>-->
+<!--            </field>-->
+
+            <field name="hours_per_week" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+
+        </field>
+    </record>
+
+    <record id="view_hr_attendance_form_inherit_custom" model="ir.ui.view">
+        <field name="name">hr.attendance.form.inherit.custom</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.hr_attendance_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='employee_id']" position="before">
+                <field name="attendance_date" options="{'numeric': true }"/>
+            </xpath>
+
+            <xpath expr="//field[@name='employee_id']" position="after">
+                <field name="project_id"/>
+                <field name="project_ref"/>
+            </xpath>
+
+            <field name="check_in" position="replace">
+                <field name="check_in" widget="datetime" options="{'numeric': true }"/>
+            </field>
+            <field name="check_out" position="replace">
+                <field name="check_out" widget="datetime" options="{'numeric': true }"/>
+            </field>
+
+            <field name="validated_overtime_hours" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+
+            <xpath expr="//field[@name='worked_hours']" position="after">
+                <field name="weekday_overtime_hours" string="Weekday OT" widget="float_time" readonly="1" invisible="weekday_overtime_hours == 0"/>
+                <field name="weekend_overtime_hours" string="Weekend OT" widget="float_time" readonly="1" invisible="weekend_overtime_hours == 0"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_employee_attendance_working_day_list" model="ir.ui.view">
+        <field name="name">employee.attendance.working.day.list</field>
+        <field name="model">hr.attendance</field>
+        <field name="arch" type="xml">
+            <list string="Employee Attendance" default_group_by="attendance_date:month">
+                <field name="attendance_date" options="{'numeric': true }"/>
+                <field name="check_in"/>
+                <field name="check_out"/>
+                <field name="worked_hours"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="hr_attendance.hr_attendance_action" model="ir.actions.act_window">
+        <field name="view_id" ref="hr_attendance.view_attendance_tree"/>
+    </record>
+</odoo>

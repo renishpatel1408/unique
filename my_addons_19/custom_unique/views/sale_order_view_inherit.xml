@@ -1,0 +1,193 @@
+<odoo>
+    <data>
+        <record id="view_order_form_inherit_custom" model="ir.ui.view">
+            <field name="name">sale.order.form.inherit.custom</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='sale_header']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+
+                <xpath expr="//div[@name='button_box']" position="inside" invisible="1">
+                        <button name="action_view_project"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-folder-open">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Project</span>
+                            </div>
+                        </button>
+                </xpath>
+
+                 <xpath expr="//header" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+
+                <xpath expr="//header" position="after">
+                    <header>
+                        <button string="Create Invoices" name="action_create_invoice" type="object" class="btn-secondary" invisible="state != 'sale'"/>
+                        <button name="action_approve_quotation" string="Approve" type="object"  class="btn-primary" invisible="state != 'draft'"/>
+                        <button string="Confirm" name="action_confirm" type="object" class="btn-primary" context="{'validate_analytic': True}" data-hotkey="q" invisible="state == 'sale' or state == 'cancel' or state == 'draft'"/>
+                        <button string="Cancel" name="action_cancel" type="object" confirm="Are you sure you want to cancel this order? This may affect related documents or processes." data-hotkey="x" invisible="state == 'cancel'"/>
+                        <button string="Print" name="sale.action_report_saleorder" type="action" data-hotkey="i"/>
+                        <button string="Set to Quotation" name="action_draft" type="object" data-hotkey="w" invisible="state != 'cancel'"/>
+<!--                        <button-->
+<!--                    name="custom_unique.action_report_saleorder_custom"-->
+<!--                    string="Print Custom Quotation"-->
+<!--                    type="action"-->
+<!--                    class="btn-primary"-->
+<!--                />-->
+                        <field name="state" widget="statusbar" statusbar_visible="draft,approved,sale"/>
+                    </header>
+                 </xpath>
+
+                <xpath expr="//group[@name='sale_header']" position="after">
+                    <group>
+                        <group string="Customer Info">
+                            <field name="date_order" string="Quotation Date" options="{'numeric': true }"/>
+                            <field name="enquiry_date" options="{'numeric': true }"/>
+<!--                            <field name="sale_enquiry_id" invisible="1"/>-->
+                            <field name="client_id" options="{'no_quick_create': True, 'no_create_edit': False}"/>
+                            <field name="contact_person_id" options="{'no_quick_create': True, 'no_create_edit': False}"/>
+                            <field name="mobile"/>
+                            <field name="email"/>
+                            <field name="ref_no"/>
+                            <field name="yeard_id"/>
+                            <field name="client_department_id"/>
+                            <field name="subject"/>
+                            <field name="location"/>
+                            <field name="boss_approval_required" invisible="1"/>
+                        </group>
+                        <group string="SalePerson Name">
+                            <field name="company_id"/>
+                            <field name="user_id"/>
+                            <field name="priority"/>
+                            <field name="enq_probability"/>
+                            <field name="sector"/>
+                        </group>
+                        <group string="Project Info">
+                            <field name="deadline" options="{'numeric': true }" widget="datetime"/>
+                            <field name="project_number"/>
+                            <field name="project_name" invisible="sector != 'marine'"/>
+                            <field name="vessel_name" invisible="sector == 'marine'"/>
+                        </group>
+                        <group string="Other Info">
+                            <field name="discount_type"/>
+                            <field name="gst_type"/>
+                        </group>
+                    </group>
+                    <br/>
+                    <group>
+                        <field name="system"/>
+                        <field name="scope"/>
+                    </group>
+                </xpath>
+                <xpath expr="//page[@name='order_lines']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//page[@name='other_information']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                     <xpath expr="//page[@name='order_lines']" position="after">
+                         <page name="services" string="Item">
+                            <group>
+                                <field name="order_line" nolabel="1" readonly="boss_approval_required">
+                                    <list editable="bottom">
+                                        <field name="product_id" string="Department"/>
+                                        <field name="product_description"/>
+                                        <field name="product_uom_qty" string="Qty"/>
+                                        <field name="uom_id"/>
+                                        <field name="price_unit" string="Amount Quotated"/>
+                                        <field name="price_subtotal" string="Amount"/>
+                                        <field name="cost_of_sales"/>
+                                        <field name="percentage"/>
+                                        <field name="remarks"/>
+                                        <field name="service_note"/>
+                                    </list>
+                                </field>
+                                <group class="oe_subtotal_footer">
+                                    <field name="service_amount" string="Total"/>
+
+                                    <label for="discount_percent" string="Discount"/>
+                                    <div class="d-flex justify-content-between" readonly="service_amount == False">
+                                        <field name="discount_percent" nolabel="1" class="text-end" style="width: 45%;" invisible="discount_type == 'amount'"/>
+                                        <field name="discount_amt" nolabel="1" class="text-end" style="width: 45%;" invisible="discount_type == 'percent'"/>
+                                        <field name="total_discount_amount" nolabel="1" class="text-end" style="width: 45%;"/>
+                                    </div>
+
+                                    <field name="amount_after_discount" string="Less Discount"/>
+
+                                    <label for="gst_type" string="GST" invisible="gst_type == 'gst_zero' or gst_type == False"/>
+                                    <div class="d-flex justify-content-between align-items-center" invisible="gst_type == 'gst_zero' or gst_type == False">
+                                        <field name="gst_percent" nolabel="1" readonly="1" style="width: 45%; white-space: nowrap;"/>
+                                        <field name="gst_amount" nolabel="1" class="text-end" style="width: 45%;"/>
+                                    </div>
+
+                                    <field name="net_amount" string="Net Amount"/>
+                                </group>
+                                <field name="note" nolabel="1" placeholder="Terms and conditions..."/>
+                            </group>
+                        </page>
+                    </xpath>
+            </field>
+        </record>
+
+<!--        <record id="sale_order_template_form_inherit" model="ir.ui.view">-->
+<!--            <field name="name">sale.order.template.form.inherit</field>-->
+<!--            <field name="model">sale.order.template</field>-->
+<!--            <field name="inherit_id" ref="sale_management.sale_order_template_view_form"/>-->
+<!--            <field name="arch" type="xml">-->
+
+<!--                <xpath expr="//page[@name='pdf_quote']" position="attributes">-->
+<!--                    <attribute name="invisible">1</attribute>-->
+<!--                </xpath>-->
+
+<!--            </field>-->
+<!--        </record>-->
+
+
+        <record id="view_sale_order_tree_inherit_custom" model="ir.ui.view">
+            <field name="name">sale.order.tree.inherit.custom</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_quotation_tree_with_onboarding"/>
+            <field name="arch" type="xml">
+
+                <field name="amount_total" position="replace">
+                    <field name="net_amount"/>
+                </field>
+
+                 <field name="activity_ids" position="attributes">
+                    <attribute name="column_invisible">1</attribute>
+                </field>
+
+                <field name="partner_id" position="replace">
+                    <field name="client_id"/>
+                </field>
+
+            </field>
+        </record>
+
+        <record id="view_sale_order_tree_inherit_order" model="ir.ui.view">
+            <field name="name">sale.order.tree.inherit.order</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_tree"/>
+            <field name="arch" type="xml">
+
+                <field name="amount_total" position="replace">
+                    <field name="net_amount"/>
+                </field>
+
+                 <field name="activity_ids" position="attributes">
+                    <attribute name="column_invisible">1</attribute>
+                </field>
+
+                <field name="partner_id" position="replace">
+                    <field name="client_id"/>
+                </field>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>

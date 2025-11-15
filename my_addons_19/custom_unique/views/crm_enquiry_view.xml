@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8" ?>
+    <odoo>
+
+        <record id="enquiry_lead_form_view" model="ir.ui.view">
+            <field name="name">enquiry.lead.form.view</field>
+            <field name="model">enquiry.lead</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <field name="state" widget="statusbar" statusbar_visible="active,approved,reject"/>
+                        <button name="action_approve" string="Approve" type="object" class="btn-primary" invisible="state != 'active'"/>
+                        <button name="action_reject" string="Reject" type="object" class="btn-primary" invisible="state != 'active'"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button type="object"
+                                    name="action_view_sale_enquiry"
+                                    class="oe_stat_button"
+                                    icon="fa-sticky-note"
+                                    invisible="sale_enquiry_count == 0">
+                                <field name="sale_enquiry_count" widget="statinfo" string="Sale Enquiry"/>
+                            </button>
+                        </div>
+
+<!--                        <div class="oe_title">-->
+<!--                            <h1>-->
+<!--                                <field name="enquiry_ref" readonly="1"/>-->
+<!--                            </h1>-->
+<!--                        </div>-->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h1 class="flex-grow-1">
+                                <field class="text-break" options="{'line_breaks': False}" widget="text" name="name" placeholder="e.g. Product Pricing"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group string="Customer Info">
+                                <field name="client_id" options="{'no_quick_create': True, 'no_create_edit': True}"/>
+                                <field name="contact_person_id" options="{'no_quick_create': True, 'no_create_edit': True}" context="{'default_parent_id': client_id}"/>
+                                <field name="mobile"/>
+                                <field name="email" widget="email"/>
+                                <label for="street" string="Address"/>
+                                <div class="o_address_format">
+                                    <field name="street" placeholder="Street..." class="o_address_street"/>
+                                    <field name="street2" placeholder="Street 2..." class="o_address_street"/>
+                                    <field name="city" placeholder="City" class="o_address_city"/>
+                                    <field name="state_id" placeholder="State" class="o_address_state"/>
+                                    <field name="zip" placeholder="ZIP" class="o_address_zip"/>
+                                    <div name="partner_address_country" class="d-flex justify-content-between">
+                                        <field name="country_id" placeholder="Country" class="o_address_country"/>
+                                    </div>
+                                </div>
+                                <field name="website"/>
+                                <field name="department_id"/>
+                                <field name="client_department_id"/>
+                                <field name="calcification"/>
+                            </group>
+                            <group string="Sale Person Info">
+                                <field name="company_id"/>
+                                <field name="enquiry_date" widget="datetime" options="{'numeric': true }"/>
+                                <field name="user_id" options="{'no_quick_create': True, 'no_create_edit': True}"/>
+                                <field name="priority"/>
+                                <field name="enq_probability"/>
+                                <field name="sector"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Notes">
+                                <group>
+                                    <field name="notes" nolabel="1" placeholder="Add enquiry details here..."/>
+                                </group>
+                            </page>
+<!--                            <page string="Select Companies">-->
+<!--                                <group>-->
+<!--                                    <field name="company_id"/>-->
+<!--                                </group>-->
+<!--                            </page>-->
+<!--                            <page string="Block Reason" invisible="state != 'block'">-->
+<!--                                <group>-->
+<!--                                    <field name="block_reason" nolabel="1" readonly="1"/>-->
+<!--                                </group>-->
+<!--                            </page>-->
+                        </notebook>
+                    </sheet>
+                    <!-- Chatter -->
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <record id="enquiry_lead_list_view" model="ir.ui.view">
+            <field name="name">enquiry.lead.list.view</field>
+            <field name="model">enquiry.lead</field>
+            <field name="priority">10</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="enquiry_ref"/>
+                    <field name="name"/>
+                    <field name="client_id"/>
+                    <field name="email"/>
+                    <field name="mobile"/>
+                    <field name="state"
+                    decoration-success="state == 'approved'"
+                    decoration-info="state == 'active'"
+                    decoration-danger="state == 'block'"
+                    widget="badge"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="enquiry_lead_view_kanban" model="ir.ui.view">
+            <field name="name">enquiry.lead.view.kanban</field>
+            <field name="model">enquiry.lead</field>
+            <field name="arch" type="xml">
+                <kanban class="o_kanban_mobile" sample="1" default_group_by="state" quick_create="false" kanban_disable_drag="1">
+                    <templates>
+                        <field name="state"/>
+                        <t t-name="card">
+                            <div class="o_kanban_card_body p-2">
+
+                                <!-- Enquiry Reference -->
+                                <div class="d-flex mb-2 justify-between">
+                                    <field name="name" class="fw-bolder fs-5"/>
+                                </div>
+
+                                <!-- Client Info with Label -->
+                                <div class="d-flex align-items-center mb-1" invisible="not client_id">
+                                    <span class="fw-bolder me-1">Name : </span>
+                                    <field name="client_id" widget="many2one_avatar" class="text-truncate" readonly="1" options="{'no_create': 1, 'no_open': 1}"/>
+                                    <field name="client_id" class="ms-2 text-truncate"/>
+                                </div>
+
+                                <!-- Company Info -->
+                                <div class="d-flex align-items-center mt-1">
+                                    <span class="fw-bolder me-1">ENQ No. : </span>
+                                    <field name="enquiry_ref" class="text-truncate"/>
+                                </div>
+
+                                <!-- Company Info -->
+<!--                                <div class="d-flex align-items-center mt-1">-->
+<!--                                    <span class="fw-bolder me-1">Contact Name : </span>-->
+<!--                                    <field name="contact_person_id" widget="many2one_avatar" class="text-truncate" readonly="1" options="{'no_create': 1, 'no_open': 1}"/>-->
+<!--                                    <field name="contact_person_id" class="ms-2 text-truncate"/>-->
+<!--                                </div>-->
+
+                                <!-- Company Info -->
+                                <div class="d-flex align-items-center mt-1">
+                                    <span class="fw-bolder me-1">Company : </span>
+                                    <field name="company_id" class="text-truncate"/>
+                                </div>
+
+                                <!-- Priority (at bottom) -->
+                                <div class="d-flex align-items-center mt-2">
+                                    <span class="fw-bolder me-1">Priority : </span>
+                                    <t t-if="record.priority and record.priority.raw_value">
+                                        <t t-set="value" t-value="record.priority.raw_value"/>
+                                       <t t-if="value == 'low'">
+                                           <field name="priority" class="fw-bolder badge rounded-pill text-bg-success px-3 py-1 fs-5"/>
+                                       </t>
+                                        <t t-if="value == 'medium'">
+                                           <field name="priority" class="fw-bolder badge rounded-pill text-bg-warning px-3 py-1 fs-5"/>
+                                        </t>
+                                        <t t-if="value == 'high'">
+                                           <field name="priority" class="fw-bolder badge rounded-pill text-bg-danger px-3 py-1 fs-5"/>
+                                       </t>
+                                    </t>
+
+                                </div>
+
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+
+        <record id="action_enquiry_lead" model="ir.actions.act_window">
+            <field name="name">Enquiry Lead</field>
+            <field name="res_model">enquiry.lead</field>
+            <field name="view_mode">kanban,list,form</field>
+        </record>
+
+
+        <record id="client_department_form_view" model="ir.ui.view">
+            <field name="name">client.department.form.view</field>
+            <field name="model">client.department</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="client_department_list_view" model="ir.ui.view">
+            <field name="name">client.department.list.view</field>
+            <field name="model">client.department</field>
+            <field name="priority">10</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="name"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="action_client_department" model="ir.actions.act_window">
+            <field name="name">Client Department</field>
+            <field name="res_model">client.department</field>
+            <field name="view_mode">list,form</field>
+        </record>
+
+        <record id="enquiry_department_form_view" model="ir.ui.view">
+            <field name="name">enquiry.department.form.view</field>
+            <field name="model">enquiry.department</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="code"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="enquiry_department_list_view" model="ir.ui.view">
+            <field name="name">enquiry.department.list.view</field>
+            <field name="model">enquiry.department</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="name"/>
+                    <field name="code"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="action_enquiry_department" model="ir.actions.act_window">
+            <field name="name">Department</field>
+            <field name="res_model">enquiry.department</field>
+            <field name="view_mode">list,form</field>
+        </record>
+
+        <record id="view_company_form_inherit_code" model="ir.ui.view">
+            <field name="name">res.company.form.inherit.code</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='color']" position="after">
+                    <field name="code"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_company_tree_inherit_code" model="ir.ui.view">
+            <field name="name">res.company.tree.inherit.code</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="before">
+                    <field name="code"/>
+                </xpath>
+            </field>
+        </record>
+    </odoo>

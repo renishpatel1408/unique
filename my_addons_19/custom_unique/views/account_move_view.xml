@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+    <odoo>
+        <record id="view_move_form_inherit_service_line" model="ir.ui.view">
+            <field name="name">account.move.form.inherit.service.line</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@id='invoice_tab']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+
+                <xpath expr="//group[1]" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+
+                <xpath expr="//group[1]" position="after">
+                    <group>
+                        <group string="Customer Info">
+                            <field name="enquiry_date" options="{'numeric': true }"/>
+                            <field name="client_id" options="{'no_quick_create': True, 'no_create_edit': False}"/>
+                            <field name="contact_person_id" options="{'no_quick_create': True, 'no_create_edit': False}"/>
+                            <field name="mobile"/>
+                            <field name="email"/>
+                            <field name="ref_no"/>
+                            <field name="yeard_id"/>
+                            <field name="client_department_id"/>
+                            <field name="subject"/>
+                            <field name="location"/>
+                        </group>
+                        <group string="SalePerson Name">
+                            <field name="company_id"/>
+                            <field name="user_id"/>
+                            <field name="priority"/>
+                            <field name="enq_probability"/>
+                            <field name="sector"/>
+                        </group>
+                        <group string="Project Info">
+                            <field name="deadline"/>
+                            <field name="project_id"/>
+                            <field name="project_name"/>
+                            <field name="vessel_name"/>
+                        </group>
+                        <group string="Other Info">
+                            <field name="invoice_date"/>
+                            <field name="invoice_date_due"/>
+                            <field name="discount_type"/>
+                            <field name="gst_type"/>
+                        </group>
+<!--                        <group>-->
+<!--                            <field name="custom_field_3"/>-->
+<!--                        </group>-->
+                    </group>
+                </xpath>
+
+<!--                 <xpath expr="//button[@name='action_post']" position="attributes">-->
+<!--                    <attribute name="invisible">1</attribute>-->
+<!--                </xpath>-->
+
+                <xpath expr="//button[@name='button_cancel']" position="after">
+                    <button name="action_confirm_invoice"
+                        string="Confirm"
+                        type="object"
+                        class="btn-primary"
+                        invisible="hide_post_button or move_type == 'entry' or display_inactive_currency_warning"/>
+                </xpath>
+
+                <xpath expr="//page[@id='invoice_tab']" position="after">
+                    <page string="Service Lines">
+                        <field name="account_service_lines">
+                            <list editable="bottom">
+                                <field name="department_id"/>
+                                <field name="department_description"/>
+                                <field name="qty"/>
+                                <field name="uom_id"/>
+                                <field name="cost_of_sales"/>
+                                <field name="service_price_unit"/>
+                                <field name="service_price_subtotal" readonly="1"/>
+                                <field name="percentage" readonly="1"/>
+                                <field name="remarks"/>
+                                <field name="service_note"/>
+                            </list>
+                        </field>
+                         <group class="oe_subtotal_footer">
+                            <field name="service_amount" string="Total"/>
+
+                            <label for="discount_percent" string="Discount"/>
+                            <div class="d-flex justify-content-between" readonly="service_amount == False">
+                                <field name="discount_percent" nolabel="1" class="text-end" style="width: 45%;" invisible="discount_type == 'amount'"/>
+                                <field name="discount_amt" nolabel="1" class="text-end" style="width: 45%;" invisible="discount_type == 'percent'"/>
+                                <field name="total_discount_amount" nolabel="1" class="text-end" style="width: 45%;"/>
+                            </div>
+
+                            <field name="amount_after_discount" string="Less Discount"/>
+
+                            <label for="gst_type" string="GST" invisible="gst_type == 'gst_zero' or gst_type == False"/>
+                            <div class="d-flex justify-content-between align-items-center" invisible="gst_type == 'gst_zero' or gst_type == False">
+                                <field name="gst_percent" nolabel="1" readonly="1" style="width: 45%; white-space: nowrap;"/>
+                                <field name="gst_amount" nolabel="1" class="text-end" style="width: 45%;"/>
+                            </div>
+
+                            <field name="net_amount" string="Net Amount"/>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+</odoo>

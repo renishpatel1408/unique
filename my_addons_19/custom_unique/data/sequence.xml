@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="seq_crm_enquiry" model="ir.sequence">
+        <field name="name">Enquiry</field>
+        <field name="code">enquiry.lead</field>
+        <field name="prefix">CRM-%(year)s-</field>
+        <field name="padding">3</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <record id="seq_sale_enquiry" model="ir.sequence">
+        <field name="name">Sale Enquiry Reference</field>
+        <field name="code">sale.enquiry</field>
+        <field name="prefix">ENQ-%(year)s-</field>
+        <field name="padding">3</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+   <record id="seq_sale_order" model="ir.sequence">
+        <field name="name">Sales Order</field>
+        <field name="code">sale.order</field>
+        <field name="prefix">QT-%(year)s-</field>
+        <field name="padding">3</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+
+   <record id="seq_sale_quotation" model="ir.sequence">
+        <field name="name">Project Ref</field>
+        <field name="code">project.project</field>
+        <field name="prefix">PRO-%(year)s-</field>
+        <field name="padding">3</field>
+        <field name="company_id" eval="False"/>
+   </record>
+
+    <record id="seq_hr_employee_code" model="ir.sequence">
+        <field name="name">Employee Code Sequence</field>
+        <field name="code">hr.employee</field>
+        <field name="prefix">EMP</field>
+        <field name="padding">3</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+
+
+</odoo>
