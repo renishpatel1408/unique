@@ -93,6 +93,10 @@ class SaleOrder(models.Model):
             order.net_amount_total_words = order.currency_id.amount_to_text(order.net_amount).replace(',', '')
             print("\n\n\n\n\n\n\n\n\n=========>>>>>>>>>>>>>>>", order.net_amount_total_words)
 
+    @api.constrains('warehouse_id', 'state', 'order_line')
+    def _check_warehouse(self):
+        return False
+
     def _get_sale_order_states(self):
         """Remove 'sent' state from dropdown"""
         states = [
@@ -181,17 +185,68 @@ class SaleOrder(models.Model):
             rec.amount_after_discount = amount_after_discount
             rec.gst_amount = gst_amount
             rec.net_amount = net_amount
-            rec.boss_approval_required = net_amount > 250000
 
     def action_approve_quotation(self):
+        boss_group = self.env.ref("custom_unique.group_unique_administrator")
         for rec in self:
             if not rec.order_line:
                 raise UserError("You cannot approve this quotation because there are no items added.")
-            if rec.net_amount > 25000 and not rec.env.user.is_boss:
-                raise UserError( "You are not allowed to approve this quotation because the amount exceeds ₹25,000. Please get approval from the Boss.")
-            if rec.net_amount <= 25000 and rec.env.user.is_boss:
-                raise UserError("This quotation amount is below ₹25,000. It should be approved by the User.")
-            rec.state = 'approved'
+
+            if rec.net_amount > 25000:
+                if self.env.user in boss_group.user_ids:
+                    rec.state = 'approved'
+                    if rec.user_id:
+                        message = f"Hello {rec.user_id.name}, your quotation '{rec.name}' (Amount: {rec.net_amount}) has been approved by the Boss!"
+                        self.env['bus.bus']._sendone(
+                            rec.user_id.partner_id,
+                            'simple_notification',
+                            {
+                                'type': 'success',
+                                'message': message,
+                                'sticky': True,
+                                'className': 'bg-success',
+                            }
+                        )
+                    continue
+                return {
+                    'type': 'ir.actions.act_window',
+                    'name': 'Boss Approval Required',
+                    'res_model': 'approve.sale.quotation.wizard',
+                    'view_mode': 'form',
+                    'view_id': self.env.ref('custom_unique.view_approve_sale_order_wizard').id,
+                    'target': 'new',
+                    'context': {
+                        'default_sale_order_id': rec.id,
+                    }
+                }
+            else:
+                rec.state = 'approved'
+
+    def action_confirm(self):
+        for rec in self:
+            if rec.name:
+                parts = rec.name.split("-")
+                if len(parts) >= 5:
+                    company_code = parts[0]
+                    dept_code = parts[2]
+                    year = parts[3]
+                    seq = parts[4]
+
+                    new_name = f"{company_code}-SO-{dept_code}-{year}-{seq}"
+                    rec.name = new_name
+
+        # Run original confirm process
+        return super(SaleOrder, self).action_confirm()
+
+    def action_draft(self):
+        orders = self.filtered(lambda s: s.state in ['cancel', 'sent'])
+        return orders.write({
+            'state': 'draft',
+            'signature': False,
+            'signed_by': False,
+            'signed_on': False,
+            'boss_approval_required': False,  # Reset boss approval flag
+        })
 
     def action_cancel_approval(self):
         for order in self:

@@ -9,7 +9,7 @@
                     <attribute name="invisible">1</attribute>
                 </xpath>
 
-                <xpath expr="//div[@name='button_box']" position="inside" invisible="1">
+                <xpath expr="//div[@name='button_box']" position="inside">
                         <button name="action_view_project"
                                 type="object"
                                 class="oe_stat_button"
@@ -24,14 +24,25 @@
                     <attribute name="invisible">1</attribute>
                 </xpath>
 
+                <xpath expr="//div[contains(@class,'oe_title')]" position="before">
+                    <div class="alert alert-danger" invisible="state != 'draft' or not boss_approval_required" groups="custom_unique.group_unique_user">
+                        You cannot approve this quotation because the amount exceeds $25,000. Only Boss can Approved
+                    </div>
+                    <div class="alert alert-info" invisible="state != 'draft' or not boss_approval_required" groups="custom_unique.group_unique_administrator">
+                        The quotation amount is above $25,000.Your approval is required before this quotation can proceed.
+                    </div>
+                </xpath>
+
+
                 <xpath expr="//header" position="after">
                     <header>
-                        <button string="Create Invoices" name="action_create_invoice" type="object" class="btn-secondary" invisible="state != 'sale'"/>
-                        <button name="action_approve_quotation" string="Approve" type="object"  class="btn-primary" invisible="state != 'draft'"/>
-                        <button string="Confirm" name="action_confirm" type="object" class="btn-primary" context="{'validate_analytic': True}" data-hotkey="q" invisible="state == 'sale' or state == 'cancel' or state == 'draft'"/>
-                        <button string="Cancel" name="action_cancel" type="object" confirm="Are you sure you want to cancel this order? This may affect related documents or processes." data-hotkey="x" invisible="state == 'cancel'"/>
-                        <button string="Print" name="sale.action_report_saleorder" type="action" data-hotkey="i"/>
-                        <button string="Set to Quotation" name="action_draft" type="object" data-hotkey="w" invisible="state != 'cancel'"/>
+                        <button string="Create Invoices" name="action_create_invoice" type="object" class="btn-secondary" invisible="state != 'sale'" groups="custom_unique.group_unique_user"/>
+                        <button name="action_approve_quotation" string="Approve" type="object"  class="btn-primary" invisible="state != 'draft' or boss_approval_required" groups="custom_unique.group_unique_user"/>
+                        <button name="action_approve_quotation" string="Approve" type="object"  class="btn-primary" invisible="state != 'draft' or not boss_approval_required" groups="custom_unique.group_unique_administrator"/>
+                        <button string="Confirm" name="action_confirm" type="object" class="btn-primary" context="{'validate_analytic': True}" data-hotkey="q" invisible="state == 'sale' or state == 'cancel' or state == 'draft'" groups="custom_unique.group_unique_user"/>
+                        <button string="Cancel" name="action_cancel" type="object" confirm="Are you sure you want to cancel this order? This may affect related documents or processes." data-hotkey="x" invisible="state == 'cancel'" groups="custom_unique.group_unique_user"/>
+                        <button string="Print" name="sale.action_report_saleorder" type="action" data-hotkey="i" groups="custom_unique.group_unique_user"/>
+                        <button string="Set to Quotation" name="action_draft" type="object" data-hotkey="w" invisible="state != 'cancel'" groups="custom_unique.group_unique_user"/>
 <!--                        <button-->
 <!--                    name="custom_unique.action_report_saleorder_custom"-->
 <!--                    string="Print Custom Quotation"-->
@@ -92,9 +103,23 @@
                      <xpath expr="//page[@name='order_lines']" position="after">
                          <page name="services" string="Item">
                             <group>
-                                <field name="order_line" nolabel="1" readonly="boss_approval_required">
+                                <field name="order_line" nolabel="1" readonly="boss_approval_required" groups="custom_unique.group_unique_user">
                                     <list editable="bottom">
-                                        <field name="product_id" string="Department"/>
+                                        <field name="product_id" string="Department" domain="[('type', '=', 'service')]"/>
+                                        <field name="product_description"/>
+                                        <field name="product_uom_qty" string="Qty"/>
+                                        <field name="uom_id"/>
+                                        <field name="price_unit" string="Amount Quotated"/>
+                                        <field name="price_subtotal" string="Amount"/>
+                                        <field name="cost_of_sales"/>
+                                        <field name="percentage"/>
+                                        <field name="remarks"/>
+                                        <field name="service_note"/>
+                                    </list>
+                                </field>
+                                <field name="order_line" nolabel="1" readonly="not boss_approval_required" groups="custom_unique.group_unique_administrator">
+                                    <list editable="bottom">
+                                        <field name="product_id" string="Department" domain="[('type', '=', 'service')]"/>
                                         <field name="product_description"/>
                                         <field name="product_uom_qty" string="Qty"/>
                                         <field name="uom_id"/>
@@ -167,6 +192,20 @@
 
             </field>
         </record>
+
+        <record id="view_order_form_hide_project_button" model="ir.ui.view">
+            <field name="name">sale.order.form.hide.project.button</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale_project.view_order_form_inherit_sale_project"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//button[@name='action_view_project_ids']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+
+            </field>
+        </record>
+
 
         <record id="view_sale_order_tree_inherit_order" model="ir.ui.view">
             <field name="name">sale.order.tree.inherit.order</field>

@@ -57,6 +57,19 @@ class PartnerConfirmationController(http.Controller):
                     }
                     template.sudo().with_context(ctx).send_mail(partner.id, email_values=email_values, force_send=True)
 
+                    if partner.user_id:
+                        message = f"Hello {partner.user_id.name}, your partner '{partner.name}' is approved by the Boss!"
+                        request.env['bus.bus']._sendone(
+                            partner.user_id.partner_id,
+                            'simple_notification',
+                            {
+                                'type': 'info',
+                                'message': message,
+                                'sticky': True,
+                                'className': 'bg-info',
+                            }
+                        )
+
                 print(f"\n Partner {token} has been approved successfully.\n")
                 return json.dumps(True)
             print(f"\n❌ Partner with token {token} not found.\n")

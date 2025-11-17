@@ -4,6 +4,7 @@
 from odoo import models, fields, api
 from datetime import datetime
 from odoo.exceptions import ValidationError
+from pygments.lexer import default
 
 
 class ProjectProject(models.Model):
@@ -60,11 +61,12 @@ class ProjectProject(models.Model):
 
     deadline = fields.Datetime(string="Deadline & Time", related="sale_order_id.deadline", readonly=False)
     vessel_name = fields.Char(string="Vessel Name", related="sale_order_id.vessel_name", readonly=False)
-    state = fields.Selection([('approved', 'Approved'), ('reject', 'Rejected')], string='Status', tracking=True, readonly=False)
+    state = fields.Selection([('active', 'Active'), ('cancel', 'Cancelled')], string='Status', tracking=True, readonly=False, default='active')
     estimation_line_ids = fields.One2many('project.estimation.line', 'project_id',string='Lines', readonly=False)
     employee_ids = fields.One2many('project.employee', 'project_id',string='Employee Details', readonly=False)
     project_complete_percent = fields.Float(string='Project compliance %', readonly=False, default=0.0)
     location = fields.Char(string="Location", related="sale_order_id.location")
+    # cancel_reason = fields.Text(string="Reason")
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -80,6 +82,20 @@ class ProjectProject(models.Model):
                 dept_code = dept.code if hasattr(dept, 'code') and dept.code else 'DEPT'
                 record.project_ref = f"{company_code}-PRO-{current_year}-{seq_number}"
         return records
+
+    def action_cancel_project(self):
+        print("============================")
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Boss Approval Required',
+            'res_model': 'project.cancel.reason',
+            'view_mode': 'form',
+            'view_id': self.env.ref('custom_unique.view_project_cancel_reason_form').id,
+            'target': 'new',
+            'context': {
+                'default_project_id': self.id,
+            }
+        }
 
 
 class ProjectEstimationLine(models.Model):

@@ -28,6 +28,8 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
+
+
             <xpath expr="//field[@name='vat']" position="before">
                 <field name="create_date" widget="datetime" options="{'numeric': true }"/>
             </xpath>
@@ -38,11 +40,24 @@
                 <field name="sector" required="1"/>
                 <field name="user_id" required="1"/>
                 <field name="company_id" required="1"/>
-                <field name="confirmation_state" readonly="1"/>
-                <field name="approval_date" widget="datetime" options="{'numeric': true }"/>
-                <field name="block_date" widget="datetime" options="{'numeric': true }"/>
-                <field name="approved_by_boss" invisible="0"/>
-                <field name="blocked_by_boss" invisible="0"/>
+                <field name="confirmation_state" readonly="1" invisible="1"/>
+                <field name="approval_date" widget="datetime" options="{'numeric': true }" invisible="not approved_by_boss" readonly="1"/>
+                <field name="block_date" widget="datetime" options="{'numeric': true }" invisible="not blocked_by_boss" readonly="1"/>
+                <field name="approved_by_boss" invisible="1"/>
+                <field name="blocked_by_boss" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_partner_form_inherit_list" model="ir.ui.view">
+        <field name="name">res.partner.list.fields</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='application_statistics']" position="after">
+                <field name="confirmation_state" decoration-success="confirmation_state == 'approved'"
+                    decoration-danger="confirmation_state == 'reject'"
+                    widget="badge"/>
             </xpath>
         </field>
     </record>

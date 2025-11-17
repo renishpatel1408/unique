@@ -6,21 +6,13 @@
             <t t-call="web.html_container">
                 <t t-set="company" t-value="company or o.company_id"/>
                 <div class="header" style="padding: 10px 0;">
-                    <div class="row align-items-center" style="height:60px;">
-                        <div class="col-3 text-left">
-                            <img t-if="company.logo"
-                                 t-att-src="image_data_uri(company.logo)"
-                                 alt="Company Logo"
-                                 style="max-height: 80px;"/>
-                        </div>
-
-                        <div class="col-9 text-left d-flex align-items-start">
-                            <h1 style="margin: 0; font-weight: bold; text-transform: uppercase; color: red; font-size: 42px;">
-                                <t t-esc="company.name"/>
-                            </h1>
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <h3 style="margin: 0; font-weight: bold; text-transform: uppercase;">
+                                <span t-field="company.name"/>
+                            </h3>
                         </div>
                     </div>
-
                     <div class="row mt16">
                         <div class="col-12 text-end">
                             <strong>Company Reg. No:</strong> <span t-field="company.vat"/><br/>
@@ -71,7 +63,7 @@
         </template>
 
         <!-- Quotation Report Template -->
-        <template id="report_sale_quotation_infocom" inherit_id="sale.report_saleorder_document">
+        <template id="report_sale_quotation_unique" inherit_id="sale.report_saleorder_document">
             <xpath expr="//t[@t-call='web.external_layout']" position="replace">
                 <t t-call="custom_unique.weblearns_layout">
                     <t t-set="o" t-value="doc"/>
@@ -82,10 +74,8 @@
                         <div class="row" style="margin-top: 15px;">
                             <div class="col-12 text-center">
                                 <h4 style="margin: 0 auto; font-weight: bold; text-transform: uppercase; display: inline-block; border-bottom: 2px solid #000; padding-bottom: 5px;">
-                                    <t t-if="doc.state == 'draft'">Quotation</t>
-                                    <t t-elif="doc.state == 'sale'">Sale Quotation</t>
-                                    <t t-elif="doc.state == 'cancel'">Cancelled</t>
-                                    <t t-elif="doc.state == 'approved'">Quotation Approved</t>
+                                    Quotation
+<!--                                    <t t-elif="doc.state == 'sale'">Sale Order</t>-->
                                 </h4>
                             </div>
                         </div>

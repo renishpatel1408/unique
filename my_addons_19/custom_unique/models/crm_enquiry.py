@@ -5,6 +5,10 @@ from odoo import api, fields, models, _
 from datetime import datetime
 from odoo.exceptions import ValidationError, UserError
 import uuid
+import logging
+
+_logger = logging.getLogger(__name__)
+
 
 class EnquiryLead(models.Model):
     _name = "enquiry.lead"
@@ -90,10 +94,13 @@ class EnquiryLead(models.Model):
                 dept = record.department_id
                 current_year = datetime.now().year
                 seq_code = self.env['ir.sequence'].next_by_code('enquiry.lead') or '001'
-                print("\n\n\n\n\n\nSDSDTFGDGTQAWEJHSEJHKESXDFJ", seq_code)
+
                 company_code = company.code if company else 'CMP'
                 dept_code = dept.code if dept else 'DEPT'
-                record.enquiry_ref = f"{company_code}-{dept_code}-{current_year}-{seq_code.split('-')[-1]}"
+
+                record.enquiry_ref = (
+                    f"{company_code}-LEAD-{dept_code}-{current_year}-{seq_code.split('-')[-1]}"
+                )
         return records
 
     def write(self, vals):
@@ -105,7 +112,7 @@ class EnquiryLead(models.Model):
                 dept_code = record.department_id.code
                 current_year = datetime.now().year
                 seq_number = record.enquiry_ref.split('-')[-1] if record.enquiry_ref else '001'
-                record.enquiry_ref = f"{company_code}-{dept_code}-{current_year}-{seq_number}"
+                record.enquiry_ref = f"{company_code}-LEAD-{dept_code}-{current_year}-{seq_number}"
                 print("\n\n\n\n\n\n\n\nSequence is.....", record.enquiry_ref)
         return res
 
@@ -260,7 +267,7 @@ class ResPartner(models.Model):
                 record.sector = record.parent_id.sector
                 record.company_id = record.parent_id.company_id.id
                 record.user_id = record.parent_id.user_id.id
-            if not record.parent_id:
+            if not record.parent_id and not self.env.context.get('skip_boss_email'):
                 print("Send Mail is....")
                 record._send_boss_email()
         return records
@@ -280,23 +287,55 @@ class ResPartner(models.Model):
         template = self.env.ref('custom_unique.partner_confirmation_mail_template', raise_if_not_found=False)
         if not template:
             return
-        boss = self.search([('is_boss', '=', True),('email', '!=', False)], limit=1)
-        if not boss:
+
+        # Find the boss partner (who has is_boss=True and has an email)
+        boss_partner = self.search([('is_boss', '=', True), ('email', '!=', False)], limit=1)
+        if not boss_partner:
+            _logger.warning("No boss found!")
             return
 
+        # Get the related user account for the boss
+        boss_user = self.env['res.users'].search([('partner_id', '=', boss_partner.id)], limit=1)
+        if not boss_user:
+            _logger.warning(f"Boss {boss_partner.name} has no user account!")
+            return
+
+        # Generate portal URL for this partner
         action = self.portal_url()
         partner_link = action.get('url') if isinstance(action, dict) else action
+
+        # Send email to the boss
         email_values = {
-            'email_to': boss.email,
+            'email_to': boss_partner.email,
             'email_from': self.user_id.email or self.env.company.email,
         }
         ctx = {
-            'boss_name': boss.name or 'Boss',
+            'boss_name': boss_partner.name or 'Boss',
             'partner_link': partner_link,
         }
-        print("Email Value is......", email_values)
-        print("Email ctx is......", ctx)
         template.with_context(ctx).send_mail(self.id, email_values=email_values, force_send=True)
+
+        # --- Send a Systray notification only to the boss user ---
+        message = f"Hello {boss_partner.name}! Your approval is required for the new partner {self.name}."
+
+        # Odoo 19 real-time notification
+        self.env['bus.bus']._sendone(
+            boss_user.partner_id,
+            'simple_notification',
+            {
+                'type': 'info',
+                'message': message,
+                'sticky': True,
+                'className': 'bg-info',
+                'links': [{
+                    'label': 'View Partner',
+                    'url': partner_link,
+                }]
+            }
+        )
+
+        _logger.info(f"Notification sent to Boss {boss_partner.name} (User ID: {boss_user.id})")
+
 
 class ResUsers(models.Model):
     _inherit = 'res.users'
@@ -305,7 +344,7 @@ class ResUsers(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        user = super(ResUsers, self).create(vals_list)
+        user = super(ResUsers, self.with_context(skip_boss_email=True)).create(vals_list)
         if 'is_boss' in vals_list:
             user.partner_id.is_boss = vals_list['is_boss']
         return user

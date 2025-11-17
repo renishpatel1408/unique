@@ -82,13 +82,11 @@ class SaleEnquiry(models.Model):
         records = super().create(vals_list)
         for record in records:
             if not record.sale_enquiry_ref or record.sale_enquiry_ref == 'New':
-                company = record.company_id
-                dept = record.department_id
+                company_code = record.company_id.code if record.company_id and record.company_id.code else 'CMP'
+                dept_code = record.department_id.code if record.department_id and record.department_id.code else 'DEPT'
                 current_year = datetime.now().year
-                seq_code = self.env['ir.sequence'].next_by_code('sale.enquiry') or 'SENQ-000'
-                seq_number = seq_code.split('-')[-1]
-                company_code = company.code if hasattr(company, 'code') and company.code else 'CMP'
-                dept_code = dept.code if hasattr(dept, 'code') and dept.code else 'DEPT'
+                seq_number = self.env['ir.sequence'].next_by_code('sale.enquiry')
+                seq_number = seq_number.split('-')[-1]
                 record.sale_enquiry_ref = f"{company_code}-ENQ-{dept_code}-{current_year}-{seq_number}"
         return records
 

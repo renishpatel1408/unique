@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <menuitem id="menu_unique_root" name="Unique" sequence="1"/>
+    <menuitem id="menu_unique_root" name="GOM" sequence="1"/>
 
     <menuitem id="menu_enquiry_lead" name="Lead" parent="menu_unique_root" sequence="1" action="action_enquiry_lead"/>
 
@@ -14,11 +14,82 @@
 
      <menuitem id="menu_sale_order" name="Order" parent="menu_sale" action="sale.action_orders" sequence="1"/>
 
-     <menuitem id="menu_gom_project" name="Project" parent="menu_unique_root" sequence="4" action="project.open_view_project_all"/>
+     <menuitem id="menu_unique_project" name="Project" parent="menu_unique_root" sequence="4" action="project.open_view_project_all"/>
 
-    <menuitem id="menu_infocom_configuration" name="Configuration" parent="menu_unique_root" sequence="99"/>
+     <menuitem id="unique_employee" name="Employees" parent="menu_unique_root" sequence="5"/>
 
-    <menuitem id="enquiry_department_menu" name="Department" parent="menu_infocom_configuration" sequence="50" action="action_enquiry_department" groups="base.group_system"/>
+<!--     <menuitem id="menu_unique_employee" name="Employees" parent="unique_employee" action="hr.open_view_employee_list_my" sequence="1"/>-->
 
-    <menuitem id="client_department_menu" name="Client Department" parent="menu_infocom_configuration" sequence="60" action="action_client_department" groups="base.group_system"/>
+<!--     <menuitem id="menu_unique_attendance" name="Attendance" parent="unique_employee" action="hr_attendance.hr_attendance_action" sequence="2"/>-->
+
+<!--    <menuitem id="menu_attendance_import_root" name="Import Attendance" parent="unique_employee" sequence="5" action="action_attendance_import_wizard"/>-->
+
+<!--    <menuitem id="menu_hr_attendance_report_wizard" name="Employee Attendance Report" parent="unique_employee" sequence="6" action="action_hr_attendance_report_wizard"/>-->
+
+<!--    <menuitem id="menu_timeoff_employee" name="Time Off" parent="unique_employee" action="hr_holidays.hr_leave_action_action_approve_department" sequence="7"/>-->
+
+    <menuitem id="menu_unique_configuration" name="Configuration" parent="menu_unique_root" sequence="99" groups="custom_unique.group_unique_administrator"/>
+
+    <menuitem id="menu_enquiry_configuration" name="Enquiry Configuration" parent="menu_unique_configuration" sequence="0"/>
+
+    <menuitem id="enquiry_department_menu" name="Department" parent="menu_enquiry_configuration" sequence="1" action="action_enquiry_department" groups="base.group_system"/>
+
+    <menuitem id="client_department_menu" name="Client Department" parent="menu_enquiry_configuration" sequence="2" action="action_client_department" groups="base.group_system"/>
+
+<!--    <menuitem id="menu_employee_configuration" name="Employee Configuration" parent="menu_unique_configuration" sequence="1"/>-->
+
+<!--     <menuitem id="employee_department_menu" name="Department" parent="menu_employee_configuration" sequence="51" action="hr.hr_department_kanban_action" groups="base.group_system"/>-->
+
+<!--    <menuitem id="menu_time_off_configuration" name="Time Off Configuration" parent="menu_unique_configuration" sequence="3"/>-->
+
+<!--    <menuitem id="employee_holiday_menu" name="Time Off Types" parent="menu_time_off_configuration" sequence="1" action="hr_holidays.open_view_holiday_status" groups="base.group_system"/>-->
+
+<!--    <menuitem id="employee_public_menu" name="Public Holidays" parent="menu_time_off_configuration" sequence="2" action="hr_holidays.open_view_public_holiday" groups="base.group_system"/>-->
+
+<!--    <menuitem id="employee_manatory_day_menu" name="Mandatory Days" parent="menu_time_off_configuration" sequence="3" action="hr_holidays.hr_leave_mandatory_day_action" groups="base.group_system"/>-->
+
+    <record id="contacts.menu_contacts" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('custom_unique.group_unique_administrator')])]"/>
+    </record>
+
+    <record id="crm.crm_menu_root" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('custom_unique.group_unique_administrator')])]"/>
+    </record>
+
+    <record id="sale.sale_menu_root" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('custom_unique.group_unique_administrator')])]"/>
+    </record>
+
+    <record id="account.menu_finance" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('custom_unique.group_unique_administrator')])]"/>
+    </record>
+
+    <record id="project.menu_main_pm" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('custom_unique.group_unique_administrator')])]"/>
+    </record>
+
+    <record id="website.menu_website_configuration" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('custom_unique.group_unique_administrator')])]"/>
+    </record>
+
+    <record id="purchase.menu_purchase_root" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('custom_unique.group_unique_administrator')])]"/>
+    </record>
+
+    <record id="stock.menu_stock_root" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('custom_unique.group_unique_administrator')])]"/>
+    </record>
+
+    <record id="hr.menu_hr_root" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('custom_unique.group_unique_administrator')])]"/>
+    </record>
+
+    <record id="hr_attendance.menu_hr_attendance_root" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('custom_unique.group_unique_administrator')])]"/>
+    </record>
+
+    <record id="hr_holidays.menu_hr_holidays_root" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('custom_unique.group_unique_administrator')])]"/>
+    </record>
+
 </odoo>

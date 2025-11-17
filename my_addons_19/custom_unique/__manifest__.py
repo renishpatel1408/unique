@@ -24,7 +24,7 @@
         'report/sale_quotation_report.xml',
         'views/menu_view.xml',
 
-        # 'wizard/import_attendance_view.xml',
+        'wizard/import_attendance_view.xml',
         # 'wizard/attendance_report_wizard_view.xml',
         # Template
         'views/partner_confirmation_template.xml',

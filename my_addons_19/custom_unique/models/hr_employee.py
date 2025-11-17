@@ -8,6 +8,9 @@ import xlsxwriter
 import base64
 from io import BytesIO
 import pytz
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class HREmployee(models.Model):
@@ -162,24 +165,74 @@ class HrAttendance(models.Model):
     total_hours_amount = fields.Monetary(string="Total (Hours × Rate)")
     st_salary_total_hour = fields.Monetary(string="ST Total")
     misc_amount = fields.Monetary(string="Misc")
+    check_in = fields.Datetime(string="Check In", required=True, tracking=True, index=True)
+    check_out = fields.Datetime(string="Check Out", tracking=True)
+
+    def convert_utc_to_local_time_only(self, dt, tz_name='Asia/Kolkata'):
+        """
+        Convert UTC datetime → Any timezone → return only HH:MM string.
+
+        Default timezone: Asia/Kolkata
+        Example usage: 'Asia/Singapore'
+        """
+        if not dt:
+            return False
+
+        # If datetime is naive, make it UTC aware
+        if not dt.tzinfo:
+            dt = pytz.UTC.localize(dt)
+
+        # Convert to target timezone
+        try:
+            local_tz = pytz.timezone(tz_name)
+        except Exception:
+            local_tz = pytz.timezone('Asia/Kolkata')  # fallback
+
+        dt_local = dt.astimezone(local_tz)
+        return dt_local.strftime('%H:%M')
+
+    _auto_update_flag = False  # Temporary flag
 
     @api.onchange('attendance_date')
     def _onchange_attendance_date(self):
+        # Mark context to indicate automatic update
+        self = self.with_context(_auto_update=True)
+
         if self.attendance_date:
+            # Update check_in to match attendance_date
             if self.check_in:
-                t = self.check_in.time()
-                self.check_in = datetime.combine(self.attendance_date, t)
+                check_in_time = self.check_in.time()
+                self.check_in = datetime.combine(self.attendance_date, check_in_time)
+
+            # Update check_out to match attendance_date
             if self.check_out:
-                t = self.check_out.time()
-                self.check_out = datetime.combine(self.attendance_date, t)
+                check_out_time = self.check_out.time()
+                self.check_out = datetime.combine(self.attendance_date, check_out_time)
 
     @api.onchange('check_in', 'check_out')
-    def _onchange_check_dates_warning(self):
+    def _onchange_check_times(self):
+        # Skip check if automatic update via context
+        if self.env.context.get('_auto_update'):
+            return
+
+        warning = {}
         if self.attendance_date:
             if self.check_in and self.check_in.date() != self.attendance_date:
-                raise UserError("Check In date does not match Attendance Date!\nPlease select the correct date.")
+                self.check_in = False  # Clear value
+                warning = {
+                    'title': _("Check-In Date Error"),
+                    'message': _("Check-In date must match Attendance Date.")
+                }
+                return {'warning': warning}
+
             if self.check_out and self.check_out.date() != self.attendance_date:
-                raise UserError("Check Out date does not match Attendance Date!\nPlease select the correct date.")
+                self.check_out = False  # Clear value
+                warning = {
+                    'title': _("Check-Out Date Error"),
+                    'message': _("Check-Out date must match Attendance Date.")
+                }
+                return {'warning': warning}
+
 
     def _calculate_attendance_costs(self):
         """
@@ -234,14 +287,13 @@ class HrAttendance(models.Model):
         office_rent_amount = (employee.office_rent_amount or 0.0) / total_working_days
         oh_cost_amount = (employee.oh_cost_amount or 0.0) / total_working_days
         others_cost_amount = (employee.others_cost_amount or 0.0) / total_working_days
-        misc_amount = (misc_amount or 0.0) / total_working_days
 
         # Calculate total expense
         total_expense = sum([
             cpf_amount, levy_amount, accomodation_amount,
             transportation_amount, insurance_amount, admin_cost_amount,
             certification_audit_cost_amount, office_rent_amount,
-            oh_cost_amount, others_cost_amount, st_salary_total_hour,misc_amount
+            oh_cost_amount, others_cost_amount, st_salary_total_hour, misc_amount
         ])
 
         # CRITICAL: Use with_context to prevent recursion
@@ -606,80 +658,244 @@ class HrAttendance(models.Model):
                 else:
                     cumulative_hours += att_worked
 
+    @api.constrains('check_in', 'check_out', 'employee_id')
+    def _check_validity(self):
+        return False
+
     @api.constrains('employee_id', 'check_in', 'check_out', 'project_id', 'attendance_date')
     def _check_attendance_validations(self):
-        singapore_tz = pytz.timezone('Asia/Singapore')
-
+        """
+        Complete attendance validation with improved error messages and warnings.
+        Validates:
+        1. Mandatory fields
+        2. Time logic (check-out after check-in)
+        3. Overlapping records prevention
+        4. Leave conflicts
+        5. Public holidays
+        6. Mandatory attendance days
+        """
         for rec in self:
-            if not rec.employee_id or not rec.project_id or not rec.attendance_date:
-                raise ValidationError(_("Please select Employee, Project, and Attendance Date."))
+            try:
+                self._validate_mandatory_fields(rec)
+                # self._check_public_holiday(rec)
+                self._check_leave_conflict(rec)
+                # self._check_mandatory_attendance(rec)
+                check_in_utc, check_out_utc = self._validate_and_normalize_times(rec)
+                self._check_overlapping_attendance(rec, check_in_utc, check_out_utc)
 
-            if not rec.check_in and not rec.check_out:
-                raise ValidationError(_("Please select both Check-in and Check-out times."))
-            elif not rec.check_in:
-                raise ValidationError(_("Please select Check-in time."))
-            elif not rec.check_out:
-                raise ValidationError(_("Please select Check-out time."))
+            except ValidationError as e:
+                # Re-raise validation errors with additional context
+                _logger.warning(
+                    "Attendance validation failed for employee %s on %s: %s",
+                    rec.employee_id.name,
+                    rec.attendance_date,
+                    str(e)
+                )
+                raise
 
-            if rec.check_in.tzinfo is None:
-                check_in_utc = pytz.UTC.localize(rec.check_in)
-            else:
-                check_in_utc = rec.check_in.astimezone(pytz.UTC)
+    def _validate_mandatory_fields(self, rec):
+        """Validate that all mandatory fields are filled."""
+        missing_fields = []
 
-            if rec.check_out.tzinfo is None:
-                check_out_utc = pytz.UTC.localize(rec.check_out)
-            else:
-                check_out_utc = rec.check_out.astimezone(pytz.UTC)
+        if not rec.employee_id:
+            missing_fields.append(_("Employee"))
+        if not rec.project_id:
+            missing_fields.append(_("Project"))
+        if not rec.attendance_date:
+            missing_fields.append(_("Attendance Date"))
 
-            check_in_local = check_in_utc.astimezone(singapore_tz)
-            check_out_local = check_out_utc.astimezone(singapore_tz)
+        if missing_fields:
+            raise ValidationError(
+                _("Missing required fields: %s\n\nPlease fill in all mandatory information before saving.")
+                % ", ".join(missing_fields)
+            )
 
-            if check_out_local <= check_in_local:
-                raise ValidationError(_(
-                    "Check-out time must be after Check-in time.\n"
-                    "Entered:\nCheck-in: %s\nCheck-out: %s"
-                ) % (
-                                          check_in_local.strftime('%d/%m/%Y %I:%M:%S %p'),
-                                          check_out_local.strftime('%d/%m/%Y %I:%M:%S %p')
-                                      ))
+        if not rec.check_in or not rec.check_out:
+            # Convert to local time for display if values exist
+            check_in_display = self.convert_utc_to_local_time_only(rec.check_in) if rec.check_in else _("Not set")
+            check_out_display = self.convert_utc_to_local_time_only(rec.check_out) if rec.check_out else _("Not set")
 
-            existing_records = self.env['hr.attendance'].search([
-                ('id', '!=', rec.id),
-                ('employee_id', '=', rec.employee_id.id),
-                ('attendance_date', '=', rec.attendance_date),
-                ('project_id', '=', rec.project_id.id)
-            ])
+            raise ValidationError(
+                _("Both Check-in and Check-out times are required.\n\n"
+                  "Current values:\n"
+                  "• Check-in: %s\n"
+                  "• Check-out: %s")
+                % (check_in_display, check_out_display)
+            )
 
-            for att in existing_records:
-                if att.check_in and att.check_out:
-                    if att.check_in.tzinfo is None:
-                        att_in_utc = pytz.UTC.localize(att.check_in)
-                    else:
-                        att_in_utc = att.check_in.astimezone(pytz.UTC)
+        # if self.check_in:
+        #     check_in_date = fields.Datetime.context_timestamp(self, self.check_in).date()
+        #     if check_in_date != self.attendance_date:
+        #         raise ValidationError("Check In date does not match Attendance Date!\nPlease select the correct date.")
+        # if self.check_out:
+        #     check_out_date = fields.Datetime.context_timestamp(self, self.check_out).date()
+        #     if check_out_date != self.attendance_date:
+        #         raise ValidationError("Check Out date does not match Attendance Date!\nPlease select the correct date.")
 
-                    if att.check_out.tzinfo is None:
-                        att_out_utc = pytz.UTC.localize(att.check_out)
-                    else:
-                        att_out_utc = att.check_out.astimezone(pytz.UTC)
+    def _validate_and_normalize_times(self, rec):
+        """Normalize times to UTC and validate time logic."""
+        # Normalize to UTC if not already timezone-aware
+        check_in_utc = rec.check_in if rec.check_in.tzinfo else pytz.UTC.localize(rec.check_in)
+        check_out_utc = rec.check_out if rec.check_out.tzinfo else pytz.UTC.localize(rec.check_out)
 
-                    att_in_local = att_in_utc.astimezone(singapore_tz)
-                    att_out_local = att_out_utc.astimezone(singapore_tz)
+        if check_out_utc <= check_in_utc:
+            # Convert to local time for display
+            check_in_local = self.convert_utc_to_local_time_only(check_in_utc)
+            check_out_local = self.convert_utc_to_local_time_only(check_out_utc)
+            print("================================================", check_in_local, check_out_local)
 
-                    overlap = (check_in_local < att_out_local) and (check_out_local > att_in_local)
-                    if overlap:
-                        raise ValidationError(_(
-                            "⚠️ Overlap found for %s on %s in project %s.\n"
-                            "Existing record: %s → %s.\n"
-                            "You are trying to enter: %s → %s."
-                        ) % (
-                                                  rec.employee_id.name,
-                                                  rec.attendance_date.strftime('%d/%m/%Y'),
-                                                  rec.project_ref or rec.project_id.name,
-                                                  att_in_local.strftime('%d/%m/%Y %I:%M:%S %p'),
-                                                  att_out_local.strftime('%d/%m/%Y %I:%M:%S %p'),
-                                                  check_in_local.strftime('%d/%m/%Y %I:%M:%S %p'),
-                                                  check_out_local.strftime('%d/%m/%Y %I:%M:%S %p')
-                                              ))
+            raise ValidationError(
+                _("Invalid time range: Check-out must be after Check-in.\n\n"
+                  "Current times:\n"
+                  "• Check-in: %s (%s)\n"
+                  "• Check-out: %s (%s)\n\n"
+                  "Please adjust the times accordingly.")
+                % (rec.attendance_date.strftime("%d/%m/%Y"), check_in_local,
+                   rec.attendance_date.strftime("%d/%m/%Y"), check_out_local)
+            )
+
+        return check_in_utc, check_out_utc
+
+    def _check_overlapping_attendance(self, rec, check_in_utc, check_out_utc):
+        """Check for overlapping attendance records."""
+        existing_records = self.env['hr.attendance'].search([
+            ('id', '!=', rec.id),
+            ('employee_id', '=', rec.employee_id.id),
+            ('attendance_date', '=', rec.attendance_date),
+        ])
+
+        for ex in existing_records:
+            ex_check_in = ex.check_in if ex.check_in.tzinfo else pytz.UTC.localize(ex.check_in)
+            ex_check_out = ex.check_out if ex.check_out.tzinfo else pytz.UTC.localize(ex.check_out)
+
+            # Check for time overlap
+            overlap = check_in_utc < ex_check_out and check_out_utc > ex_check_in
+
+            if overlap:
+                # Convert all times to local format for display
+                ex_check_in_local = self.convert_utc_to_local_time_only(ex_check_in)
+                ex_check_out_local = self.convert_utc_to_local_time_only(ex_check_out)
+                check_in_local = self.convert_utc_to_local_time_only(check_in_utc)
+                check_out_local = self.convert_utc_to_local_time_only(check_out_utc)
+
+                if ex.project_id == rec.project_id:
+                    raise ValidationError(
+                        _("⚠️ Overlapping Attendance Detected\n\n"
+                          "Employee '%s' already has attendance for the same project during this time.\n\n"
+                          "📋 Details:\n"
+                          "• Date: %s\n"
+                          "• Project: %s\n"
+                          "• Existing Time: %s - %s\n"
+                          "• New Time: %s - %s\n\n"
+                          "💡 Solution: Adjust the check-in/check-out times to avoid overlap or delete the existing record.")
+                        % (rec.employee_id.name,
+                           rec.attendance_date.strftime("%d/%m/%Y"),
+                           ex.project_id.name,
+                           ex_check_in_local,
+                           ex_check_out_local,
+                           check_in_local,
+                           check_out_local)
+                    )
+                else:
+                    raise ValidationError(
+                        _("⚠️ Multi-Project Conflict Detected\n\n"
+                          "Employee '%s' cannot work on multiple projects during the same time period.\n\n"
+                          "📋 Conflict Details:\n"
+                          "• Date: %s\n"
+                          "• Existing Project: %s (%s - %s)\n"
+                          "• Enter Project: %s (%s - %s)\n\n"
+                          "💡 Solution: Adjust times to avoid overlap or reassign one of the projects.")
+                        % (rec.employee_id.name,
+                           rec.attendance_date.strftime("%d/%m/%Y"),
+                           ex.project_id.name,
+                           ex_check_in_local,
+                           ex_check_out_local,
+                           rec.project_id.name,
+                           check_in_local,
+                           check_out_local)
+                    )
+
+    def _check_leave_conflict(self, rec):
+        """Check if employee is on approved leave."""
+        leave_exists = self.env['hr.leave'].search([
+            ('employee_id', '=', rec.employee_id.id),
+            ('state', '=', 'validate'),
+            ('request_date_from', '<=', rec.attendance_date),
+            ('request_date_to', '>=', rec.attendance_date),
+        ], limit=1)
+        print("\n\n\n\n\n\n\n\n\n\n\n\n\n============", leave_exists)
+
+        if leave_exists:
+            raise ValidationError(
+                _("🚫 Leave Conflict\n\n"
+                  "Employee '%s' has an approved leave on this date.\n"
+                  "Attendance cannot be recorded during leave periods.\n\n"
+                  "📋 Leave Details:\n"
+                  "• Leave Type: %s\n"
+                  "• Leave Period: %s to %s\n"
+                  "• Status: %s\n\n"
+                  "💡 Solution: Cancel the leave request first or choose a different date.")
+                % (rec.employee_id.name,
+                   leave_exists.holiday_status_id.name,
+                   leave_exists.request_date_from.strftime("%d/%m/%Y"),
+                   leave_exists.request_date_to.strftime("%d/%m/%Y"),
+                   dict(leave_exists._fields['state'].selection).get(leave_exists.state))
+            )
+
+    def _check_public_holiday(self, rec):
+        """Check if the date is a public holiday."""
+        if not rec.employee_id.resource_calendar_id:
+            _logger.warning(
+                "No working calendar assigned to employee %s. Skipping public holiday check.",
+                rec.employee_id.name
+            )
+            return
+
+        public_holiday = self.env['resource.calendar.leaves'].search([
+            ('calendar_id', '=', rec.employee_id.resource_calendar_id.id),
+            ('date_from', '<=', rec.attendance_date),
+            ('date_to', '>=', rec.attendance_date),
+        ], limit=1)
+        print("\n\n\n\n\n\n\n================>>>>>>>>>>>>>>>>>>", public_holiday)
+
+        if public_holiday:
+            # Check if it's specifically marked as public holiday (if field exists)
+            raise ValidationError(
+                _("🏖️ Public Holiday\n\n"
+                  "The date %s is a public holiday.\n"
+                  "Regular attendance cannot be recorded on public holidays.\n\n"
+                  "📋 Holiday Details:\n"
+                  "• Holiday Name: %s\n"
+                  "💡 Note: If this is overtime or special work, please use the appropriate "
+                  "attendance type or contact HR.")
+                % (rec.attendance_date.strftime("%d/%m/%Y"),
+                   public_holiday.name)
+            )
+
+    def _check_mandatory_attendance(self, rec):
+        """Check mandatory attendance days."""
+        mandatory_day = self.env['hr.leave.mandatory.day'].search([
+            ('start_date', '<=', rec.attendance_date),
+            ('end_date', '>=', rec.attendance_date)
+        ], limit=1)
+
+        if mandatory_day:
+            _logger.info(
+                "Attendance recorded on mandatory day %s for employee %s",
+                rec.attendance_date,
+                rec.employee_id.name
+            )
+
+            # Raise warning for mandatory day
+            raise ValidationError(
+                _("Warning: %s is a mandatory attendance day.\n"
+                  "Reason: %s\n"
+                  "Employee: %s") % (
+                    rec.attendance_date,
+                    mandatory_day.name or 'Mandatory Attendance Required',
+                    rec.employee_id.name
+                )
+            )
 
     @api.model
     def action_export_attendance_excel(self, attendance_ids, wizard_data=None):
@@ -815,7 +1031,6 @@ class HrAttendance(models.Model):
             worksheet.write(header_row, col_num, header, header_format)
 
         data_start_row = header_row + 1
-        singapore_tz = pytz.timezone('Asia/Singapore')
 
         for counter, attendance in enumerate(attendances, start=1):
             row = data_start_row + counter - 1
@@ -857,13 +1072,14 @@ class HrAttendance(models.Model):
                             cell_format)
             col += 1
 
-            time_in = self.convert_utc_to_local_time(attendance.check_in, 'Asia/Kolkata')
-            worksheet.write(row, col, time_in, time_format)
+            # Time In - Using convert_utc_to_local_time_only method
+            time_in = self.convert_utc_to_local_time_only(attendance.check_in, 'Asia/Kolkata')
+            worksheet.write(row, col, time_in if time_in else '-', time_format)
             col += 1
 
-            # Time Out - Using the convert_utc_to_local_time method
-            time_out = self.convert_utc_to_local_time(attendance.check_out, 'Asia/Kolkata')
-            worksheet.write(row, col, time_out, time_format)
+            # Time Out - Using convert_utc_to_local_time_only method
+            time_out = self.convert_utc_to_local_time_only(attendance.check_out, 'Asia/Kolkata')
+            worksheet.write(row, col, time_out if time_out else '-', time_format)
             col += 1
 
             worksheet.write(row, col, self._format_hours(attendance.normal_hour), cell_format)
@@ -902,7 +1118,7 @@ class HrAttendance(models.Model):
             col += 1
             worksheet.write(row, col, attendance.others_cost_amount or 0, currency_format)
             col += 1
-            worksheet.write(row, col, '-', cell_format)
+            worksheet.write(row, col, attendance.misc_amount or 0, currency_format)
             col += 1
             worksheet.write(row, col, attendance.total_expense or 0, currency_format)
 
