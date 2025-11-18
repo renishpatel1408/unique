@@ -16,28 +16,28 @@ _logger = logging.getLogger(__name__)
 class HREmployee(models.Model):
     _inherit = 'hr.employee'
 
-    code = fields.Char(string="Code")
+    code = fields.Char(string="Code", tracking=True)
     sector = fields.Selection([
         ('marine', 'Marine'),
         ('process', 'Process'),
         ('construction', 'Construction'),
         ('employment_agency', 'Employment Agency'),
-    ], string='Sector')
+    ], string='Sector', tracking=True)
 
-    rate_per_hour = fields.Monetary(string="Rate Per Hour")
+    rate_per_hour = fields.Monetary(string="Rate Per Hour", tracking=True)
     currency_id = fields.Many2one('res.currency', string="Currency", required=True,
-                                  default=lambda self: self.env.company.currency_id.id)
-    salary_rate_per_hour = fields.Monetary(string="Salary Rate Per Hour")
-    cpf_amount = fields.Monetary(string="CPF")
-    levy_amount = fields.Monetary(string="Levy")
-    accomodation_amount = fields.Monetary(string="Accommodation")
-    transportation_amount = fields.Monetary(string="Transportation")
-    insurance_amount = fields.Monetary(string="Insurance")
-    admin_cost_amount = fields.Monetary(string="Admin Cost")
-    certification_audit_cost_amount = fields.Monetary(string="Certification / Audit Cost")
-    office_rent_amount = fields.Monetary(string="Office Rent")
-    oh_cost_amount = fields.Monetary(string="OH Cost")
-    others_cost_amount = fields.Monetary(string="Others")
+                                  default=lambda self: self.env.company.currency_id.id, tracking=True)
+    salary_rate_per_hour = fields.Monetary(string="Salary Rate Per Hour", tracking=True)
+    cpf_amount = fields.Monetary(string="CPF", tracking=True)
+    levy_amount = fields.Monetary(string="Levy", tracking=True)
+    accomodation_amount = fields.Monetary(string="Accommodation", tracking=True)
+    transportation_amount = fields.Monetary(string="Transportation", tracking=True)
+    insurance_amount = fields.Monetary(string="Insurance", tracking=True)
+    admin_cost_amount = fields.Monetary(string="Admin Cost", tracking=True)
+    certification_audit_cost_amount = fields.Monetary(string="Certification / Audit Cost", tracking=True)
+    office_rent_amount = fields.Monetary(string="Office Rent", tracking=True)
+    oh_cost_amount = fields.Monetary(string="OH Cost", tracking=True)
+    others_cost_amount = fields.Monetary(string="Others", tracking=True)
 
     # REMOVED: working_days_month field
 
@@ -110,30 +110,31 @@ class HrAttendance(models.Model):
     _inherit = 'hr.attendance'
     _order = "attendance_date asc"
 
-    project_id = fields.Many2one('project.project', string="Project")
+    project_id = fields.Many2one('project.project', string="Project", tracking=True)
     project_ref = fields.Char(string="Project No.", readonly=True, related="project_id.project_ref")
-    attendance_date = fields.Date(string="Attendance Date")
+    attendance_date = fields.Date(string="Attendance Date", tracking=True)
     attendance_day = fields.Char(string="Day", compute='_compute_attendance_day', store=True)
     client_id = fields.Many2one('res.partner', string='Client',
                                 domain="[('parent_id', '=', False), ('approved_by_boss', '=', True)]",
-                                related="project_id.client_id")
-    enquiry_department_id = fields.Many2one("enquiry.department", string="Project Department")
+                                related="project_id.client_id", tracking=True)
+    enquiry_department_id = fields.Many2one("enquiry.department", string="Project Department", tracking=True)
     enquiry_department_code = fields.Char(related="enquiry_department_id.code", store=True)
     vessel_name = fields.Char(string="Vessel Name", related="project_id.name")
-    worked_hours = fields.Float(string="Worked Hours", compute="_compute_worked_hours", store=True)
-    overtime_hours = fields.Float(string="Overtime Hours", compute="_compute_overtime_hours", store=True)
+    worked_hours = fields.Float(string="Worked Hours", compute="_compute_worked_hours", store=True, tracking=True)
+    overtime_hours = fields.Float(string="Overtime Hours", compute="_compute_overtime_hours", store=True, tracking=True)
     weekend_overtime_hours = fields.Float(string="Weekend Overtime Hours", compute="_compute_overtime_hours",
-                                          store=True)
+                                          store=True, tracking=True)
     weekday_overtime_hours = fields.Float(string="WeekDay Overtime Hours", compute="_compute_overtime_hours",
-                                          store=True)
-    rate_per_hour = fields.Monetary(string="Rate Per Hour", related="employee_id.rate_per_hour", store=True)
+                                          store=True, tracking=True)
+    rate_per_hour = fields.Monetary(string="Rate Per Hour", related="employee_id.rate_per_hour", store=True,
+                                    tracking=True)
     salary_rate_per_hour = fields.Monetary(string="Salary Rate Per Hour", related="employee_id.salary_rate_per_hour",
-                                           store=True)
+                                           store=True, tracking=True)
 
     currency_id = fields.Many2one('res.currency', string="Currency", required=True,
-                                  default=lambda self: self.env.company.currency_id.id)
+                                  default=lambda self: self.env.company.currency_id.id, tracking=True)
 
-    # CPF and other expense fields - will be auto-calculated
+    # CPF and other expense fields - with tracking
     cpf_amount = fields.Monetary(string="CPF")
     levy_amount = fields.Monetary(string="Levy")
     accomodation_amount = fields.Monetary(string="Accommodation")
@@ -146,25 +147,28 @@ class HrAttendance(models.Model):
     others_cost_amount = fields.Monetary(string="Others")
 
     emp_working_dept = fields.Many2one('hr.department', string='Employee Working Department',
-                                       related="employee_id.department_id")
+                                       related="employee_id.department_id",)
     employee_department = fields.Char(string='Department', related="emp_working_dept.name")
-    designation_id = fields.Many2one('hr.job', related="employee_id.job_id", string="Designation")
+    designation_id = fields.Many2one('hr.job', related="employee_id.job_id", string="Designation", tracking=True)
     sector = fields.Selection([
         ('marine', 'Marine'),
         ('process', 'Process'),
         ('construction', 'Construction'),
         ('employment_agency', 'Employment Agency'),
-    ], string='Sector', related='employee_id.sector')
+    ], string='Sector', related='employee_id.sector', tracking=True)
     employee_code = fields.Char(string='Employee Code', related="employee_id.code")
-    work_location_id = fields.Many2one(related='employee_id.work_location_id', string='Location', related_sudo=False)
-    company_id = fields.Many2one('res.company', string='Company', index=True, related='employee_id.company_id')
+    work_location_id = fields.Many2one(related='employee_id.work_location_id', string='Location', related_sudo=False,
+                                       tracking=True)
+    company_id = fields.Many2one('res.company', string='Company', index=True, related='employee_id.company_id',
+                                 tracking=True)
     company_code = fields.Char(related="company_id.code")
-    total_expense = fields.Monetary(string="Total Expense")
-    resource_calendar_id = fields.Many2one(related='employee_id.resource_calendar_id', store=True, check_company=True)
-    normal_hour = fields.Float(string="Normal Hour", compute="_compute_normal_hour", store=True)
-    total_hours_amount = fields.Monetary(string="Total (Hours × Rate)")
-    st_salary_total_hour = fields.Monetary(string="ST Total")
-    misc_amount = fields.Monetary(string="Misc")
+    total_expense = fields.Monetary(string="Total Expense", tracking=True)
+    resource_calendar_id = fields.Many2one(related='employee_id.resource_calendar_id', store=True, check_company=True,
+                                           tracking=True)
+    normal_hour = fields.Float(string="Normal Hour", compute="_compute_normal_hour", store=True, tracking=True)
+    total_hours_amount = fields.Monetary(string="Total (Hours × Rate)", tracking=True)
+    st_salary_total_hour = fields.Monetary(string="ST Total", tracking=True)
+    misc_amount = fields.Monetary(string="Misc", tracking=True)
     check_in = fields.Datetime(string="Check In", required=True, tracking=True, index=True)
     check_out = fields.Datetime(string="Check Out", tracking=True)
 
@@ -195,43 +199,104 @@ class HrAttendance(models.Model):
 
     @api.onchange('attendance_date')
     def _onchange_attendance_date(self):
-        # Mark context to indicate automatic update
-        self = self.with_context(_auto_update=True)
+        if not self.attendance_date:
+            return
 
-        if self.attendance_date:
-            # Update check_in to match attendance_date
-            if self.check_in:
-                check_in_time = self.check_in.time()
-                self.check_in = datetime.combine(self.attendance_date, check_in_time)
+        if not self.check_in or not self.check_out:
+            return
 
-            # Update check_out to match attendance_date
-            if self.check_out:
-                check_out_time = self.check_out.time()
-                self.check_out = datetime.combine(self.attendance_date, check_out_time)
+        # Combine attendance_date with existing time
+        check_in = datetime.combine(self.attendance_date, self.check_in.time())
+        check_out = datetime.combine(self.attendance_date, self.check_out.time())
+
+        # Set context flag to skip validation in _onchange_check_times
+        self.with_context(_auto_update=True)
+        self.check_in = check_in
+        self.check_out = check_out
 
     @api.onchange('check_in', 'check_out')
     def _onchange_check_times(self):
         # Skip check if automatic update via context
         if self.env.context.get('_auto_update'):
             return
+        
+        if not self.check_in or not self.check_out:
+            return
+
+        check_in = datetime.combine(self.attendance_date, self.check_in.time())
+        check_out = datetime.combine(self.attendance_date, self.check_out.time())
+        print("\n\n\n\n\n\n\n\n\nfsdghsfdg", check_in, check_out)
+        print("\n\n\n\n\n\n\n\n\nfsdghsfdg>>>>>>>>>", self.attendance_date)
+        print("\n\n\n\n\n\n\n\n\nfsdghsfdg>>>>>,.,.,.,.>>>>", check_in.date())
+        print("\n\n\n\n\n\n\n\n\nfsdghsfdg>>>>>>>,.,.,.,.,.,.,.,.,.,.,.>>", check_out.date())
 
         warning = {}
         if self.attendance_date:
-            if self.check_in and self.check_in.date() != self.attendance_date:
-                self.check_in = False  # Clear value
+            if check_in.date() != self.attendance_date:
                 warning = {
                     'title': _("Check-In Date Error"),
                     'message': _("Check-In date must match Attendance Date.")
                 }
+                self.check_in = False
                 return {'warning': warning}
 
-            if self.check_out and self.check_out.date() != self.attendance_date:
-                self.check_out = False  # Clear value
+            if check_out.date() != self.attendance_date:
                 warning = {
                     'title': _("Check-Out Date Error"),
                     'message': _("Check-Out date must match Attendance Date.")
                 }
+                self.check_out = False
                 return {'warning': warning}
+
+    # @api.onchange('attendance_date')
+    # def _onchange_attendance_date(self):
+    #     if not self.attendance_date:
+    #         return
+    #
+    #     if not self.check_in:
+    #         self.check_in = datetime.combine(self.attendance_date, self.check_in.time())
+    #
+    #     # Combine attendance_date with the existing time values
+    #     if self.check_in:
+    #         check_in = datetime.combine(self.attendance_date, self.check_in.time())
+    #         self.check_in = check_in
+    #     if self.check_out:
+    #         check_out = datetime.combine(self.attendance_date, self.check_out.time())
+    #         self.check_out = check_out
+    #
+    #         # IMPORTANT: reassign self WITH context
+    #     self = self.with_context(_auto_update=True)
+    #
+    #
+    # @api.onchange('check_in', 'check_out')
+    # def _onchange_check_times(self):
+    #     # Skip validation for automatic update
+    #     if self.env.context.get('_auto_update'):
+    #         return
+    #
+    #     if not self.attendance_date or not self.check_in or not self.check_out:
+    #         return
+    #
+    #     # Recombine times with attendance_date
+    #     check_in = datetime.combine(self.attendance_date, self.check_in.time())
+    #     check_out = datetime.combine(self.attendance_date, self.check_out.time())
+    #
+    #     # Validation
+    #     if check_in.date() != self.attendance_date:
+    #         warning = {
+    #             'title': _("Check-In Date Error"),
+    #             'message': _("Check-In date must match Attendance Date."),
+    #         }
+    #         self.check_in = False
+    #         return {'warning': warning}
+    #
+    #     if check_out.date() != self.attendance_date:
+    #         warning = {
+    #             'title': _("Check-Out Date Error"),
+    #             'message': _("Check-Out date must match Attendance Date."),
+    #         }
+    #         self.check_out = False
+    #         return {'warning': warning}
 
 
     def _calculate_attendance_costs(self):
@@ -677,9 +742,9 @@ class HrAttendance(models.Model):
         for rec in self:
             try:
                 self._validate_mandatory_fields(rec)
-                # self._check_public_holiday(rec)
+                self._check_public_holiday(rec)
                 self._check_leave_conflict(rec)
-                # self._check_mandatory_attendance(rec)
+                self._check_mandatory_attendance(rec)
                 check_in_utc, check_out_utc = self._validate_and_normalize_times(rec)
                 self._check_overlapping_attendance(rec, check_in_utc, check_out_utc)
 
@@ -843,34 +908,85 @@ class HrAttendance(models.Model):
             )
 
     def _check_public_holiday(self, rec):
-        """Check if the date is a public holiday."""
+        """
+        Public Holiday TIME-based validation
+        - Attendance = 24Hr datetime
+        - Holiday = datetime (date_from/date_to)
+        """
+
         if not rec.employee_id.resource_calendar_id:
-            _logger.warning(
-                "No working calendar assigned to employee %s. Skipping public holiday check.",
-                rec.employee_id.name
-            )
             return
 
-        public_holiday = self.env['resource.calendar.leaves'].search([
-            ('calendar_id', '=', rec.employee_id.resource_calendar_id.id),
+        calendar_id = rec.employee_id.resource_calendar_id.id
+
+        check_in_dt = rec.check_in
+        check_out_dt = rec.check_out
+
+        if not check_in_dt or not check_out_dt:
+            return
+
+        # Get holiday records for the same date
+        holidays = self.env['resource.calendar.leaves'].search([
+            ('calendar_id', '=', calendar_id),
             ('date_from', '<=', rec.attendance_date),
             ('date_to', '>=', rec.attendance_date),
         ], limit=1)
-        print("\n\n\n\n\n\n\n================>>>>>>>>>>>>>>>>>>", public_holiday)
 
-        if public_holiday:
-            # Check if it's specifically marked as public holiday (if field exists)
-            raise ValidationError(
-                _("🏖️ Public Holiday\n\n"
-                  "The date %s is a public holiday.\n"
-                  "Regular attendance cannot be recorded on public holidays.\n\n"
-                  "📋 Holiday Details:\n"
-                  "• Holiday Name: %s\n"
-                  "💡 Note: If this is overtime or special work, please use the appropriate "
-                  "attendance type or contact HR.")
-                % (rec.attendance_date.strftime("%d/%m/%Y"),
-                   public_holiday.name)
-            )
+        for holiday in holidays:
+            # Extract only holiday DATE (important)
+            holiday_date = holiday.date_from.date()
+
+            # Extract holiday start & end TIME
+            start_time = holiday.date_from.time()
+            end_time = holiday.date_to.time()
+
+            # Combine date + time into datetime
+            holiday_start_dt = datetime.combine(rec.attendance_date, start_time)
+            holiday_end_dt = datetime.combine(rec.attendance_date, end_time)
+
+            # Check overlap
+            overlap = not (check_out_dt <= holiday_start_dt or check_in_dt >= holiday_end_dt)
+
+            if overlap:
+                # Convert times to local timezone for display
+                check_in_local = self.convert_utc_to_local_time_only(check_in_dt, 'Asia/Kolkata')
+                check_out_local = self.convert_utc_to_local_time_only(check_out_dt, 'Asia/Kolkata')
+                holiday_start_local = self.convert_utc_to_local_time_only(holiday.date_from, 'Asia/Kolkata')
+                holiday_end_local = self.convert_utc_to_local_time_only(holiday.date_to, 'Asia/Kolkata')
+
+                raise ValidationError(_(
+                    "🚫 Public Holiday Time Conflict\n\n"
+                    "Your Attendance time overlaps with Public Holiday time.\n\n"
+                    "📅 Attendance:\n"
+                    "- From: %s %s\n"
+                    "- To: %s %s\n\n"
+                    "🏖️ Holiday Date: %s\n"
+                    "⏰ Holiday Time: %s to %s\n"
+                    "📘 Holiday Name: %s"
+                ) % (
+                                          rec.attendance_date.strftime("%d/%m/%Y"),
+                                          check_in_local or '-',
+                                          rec.attendance_date.strftime("%d/%m/%Y"),
+                                          check_out_local or '-',
+                                          holiday_date.strftime("%d/%m/%Y"),
+                                          holiday_start_local or '-',
+                                          holiday_end_local or '-',
+                                          holiday.name
+                                      ))
+
+        # if public_holiday:
+        #     # Check if it's specifically marked as public holiday (if field exists)
+        #     raise ValidationError(
+        #         _("🏖️ Public Holiday\n\n"
+        #           "The date %s is a public holiday.\n"
+        #           "Regular attendance cannot be recorded on public holidays.\n\n"
+        #           "📋 Holiday Details:\n"
+        #           "• Holiday Name: %s\n"
+        #           "💡 Note: If this is overtime or special work, please use the appropriate "
+        #           "attendance type or contact HR.")
+        #         % (rec.attendance_date.strftime("%d/%m/%Y"),
+        #            public_holiday.name)
+        #     )
 
     def _check_mandatory_attendance(self, rec):
         """Check mandatory attendance days."""
@@ -878,6 +994,7 @@ class HrAttendance(models.Model):
             ('start_date', '<=', rec.attendance_date),
             ('end_date', '>=', rec.attendance_date)
         ], limit=1)
+        print("======================>>>>>>>>>>>>>>>>>>>>>", mandatory_day)
 
         if mandatory_day:
             _logger.info(
@@ -891,7 +1008,7 @@ class HrAttendance(models.Model):
                 _("Warning: %s is a mandatory attendance day.\n"
                   "Reason: %s\n"
                   "Employee: %s") % (
-                    rec.attendance_date,
+                    rec.attendance_date.strftime("%d/%m/%Y"),
                     mandatory_day.name or 'Mandatory Attendance Required',
                     rec.employee_id.name
                 )
@@ -1158,5 +1275,5 @@ class HrAttendance(models.Model):
 class ResourceCalendar(models.Model):
     _inherit = 'resource.calendar'
 
-    saturday_hours = fields.Float(string="Saturday Hours", default=4.0)
-    mon_to_fri_hours = fields.Float(string="Mon–Fri Hours", default=8.0)
+    saturday_hours = fields.Float(string="Saturday Hours", default=4.0, tracking=True)
+    mon_to_fri_hours = fields.Float(string="Mon–Fri Hours", default=8.0, tracking=True)

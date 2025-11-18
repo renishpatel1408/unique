@@ -300,4 +300,7 @@
             </t>
         </div>
     </t>
+
+    <t t-name="custom_unique.GomNotificationListener"/>
 </templates>
+

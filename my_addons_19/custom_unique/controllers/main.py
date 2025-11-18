@@ -86,6 +86,21 @@ class PartnerConfirmationController(http.Controller):
                     'block_date': fields.Date.today(),
                     'confirmation_state': 'rejected',
                 })
+                if partner.user_id:
+                    message = (
+                        f"Hello {partner.user_id.name}, your partner "
+                        f"'{partner.name}' is rejected by the Boss."
+                    )
+                    self.env['bus.bus']._sendone(
+                        partner.user_id.partner_id,
+                        'simple_notification',
+                        {
+                            'type': 'danger',
+                            'message': message,
+                            'sticky': True,
+                            'className': 'bg-danger',
+                        }
+                    )
                 print(f"\n Partner {token} has been blocked.\n")
                 return json.dumps(True)
             print(f"\n❌ Failed to block Partner {token}. Missing reason or not found.\n")

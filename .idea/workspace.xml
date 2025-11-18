@@ -4,28 +4,28 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d4ef4e0e-407e-4563-a99e-25c94f8b08c6" name="Changes" comment="fix the eatimantion hours">
+    <list default="true" id="d4ef4e0e-407e-4563-a99e-25c94f8b08c6" name="Changes" comment="add the unique module">
+      <change afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/static/src/js/infocom.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/static/src/js/notifcation.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/__manifest__.py" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/__manifest__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/controllers/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/controllers/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/models/account_move.py" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/models/account_move.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/models/crm_enquiry.py" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/models/crm_enquiry.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/models/hr_employee.py" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/models/hr_employee.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/models/project_project.py" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/models/project_project.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/models/sale_order.py" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/models/sale_order.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/models/sales_enquiry.py" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/models/sales_enquiry.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/report/sale_quotation_report.xml" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/report/sale_quotation_report.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/security/ir.model.access.csv" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/security/ir.model.access.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/security/res_groups.xml" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/security/res_groups.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/static/src/js/unique.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/static/src/xml/employee_report.xml" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/static/src/xml/employee_report.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/views/account_move_view.xml" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/views/account_move_view.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/views/crm_enquiry_view.xml" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/views/crm_enquiry_view.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/views/hr_employee_view.xml" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/views/hr_employee_view.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/views/menu_view.xml" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/views/menu_view.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/views/project_project_view.xml" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/views/project_project_view.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/views/res_user_view.xml" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/views/res_user_view.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/views/sale_enquiry_view.xml" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/views/sale_enquiry_view.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/views/sale_order_view_inherit.xml" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/views/sale_order_view_inherit.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/wizard/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/wizard/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/wizard/import_attendance.py" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/wizard/import_attendance.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/wizard/import_attendance_view.xml" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/wizard/import_attendance_view.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_addons_19/custom_unique/wizard/attendance_report_wizard_view.xml" beforeDir="false" afterPath="$PROJECT_DIR$/my_addons_19/custom_unique/wizard/attendance_report_wizard_view.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -171,7 +171,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763122076495</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="add the unique module">
+      <option name="closed" value="true" />
+      <created>1763369133318</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1763369133318</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -183,7 +191,8 @@
     <MESSAGE value="generate xlsx report" />
     <MESSAGE value="fix project report" />
     <MESSAGE value="fix the eatimantion hours" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix the eatimantion hours" />
+    <MESSAGE value="add the unique module" />
+    <option name="LAST_COMMIT_MESSAGE" value="add the unique module" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

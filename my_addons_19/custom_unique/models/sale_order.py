@@ -9,65 +9,69 @@ from odoo.exceptions import ValidationError, UserError
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    sale_enquiry_id = fields.Many2one('sale.enquiry', string='Enquiry', index=True, store=True)
-    enquiry_id = fields.Many2one('enquiry.lead', string='Enquiry', index=True, related="sale_enquiry_id.enquiry_id")
-    department_id = fields.Many2one("enquiry.department", string="Department", required=True, related="enquiry_id.department_id", store=True)
-    enquiry_date = fields.Datetime(
-        string="Enquiry Date",
-        help="Date when the enquiry was created.",
-        related="enquiry_id.create_date",
-        store=True
-    )
+    sale_enquiry_id = fields.Many2one('sale.enquiry', string='Enquiry', index=True, store=True, tracking=True)
+    enquiry_id = fields.Many2one('enquiry.lead', string='Enquiry', index=True, related="sale_enquiry_id.enquiry_id",
+                                 tracking=True)
+    department_id = fields.Many2one("enquiry.department", string="Department", required=True,
+                                    related="enquiry_id.department_id", store=True, tracking=True)
+    enquiry_date = fields.Datetime(string="Enquiry Date", help="Date when the enquiry was created.",
+                                   related="enquiry_id.create_date", store=True, tracking=True)
     client_id = fields.Many2one('res.partner', string='Company Name', domain="[('parent_id', '=', False)]",
-                                related="enquiry_id.client_id")
+                                related="enquiry_id.client_id", tracking=True)
     contact_person_id = fields.Many2one('res.partner', string='Contact Name', domain="[('parent_id', '=', client_id)]",
-                                        related="enquiry_id.contact_person_id")
-    mobile = fields.Char(string="Contact No.", readonly=False,help="Enter multiple mobile numbers separated by commas or new lines.", related="client_id.phone")
-    email = fields.Char(string='Email', store=True, readonly=False, related="client_id.email")
-    ref_no = fields.Char(string="Ref No.", related="sale_enquiry_id.ref_no")
-    client_department_id = fields.Many2one("client.department", string="Client Department", required=False, related="enquiry_id.client_department_id")
-    subject = fields.Char(string="Subject")
-    location = fields.Char(string="Location")
+                                        related="enquiry_id.contact_person_id", tracking=True)
+    mobile = fields.Char(string="Contact No.", readonly=False,
+                         help="Enter multiple mobile numbers separated by commas or new lines.",
+                         related="client_id.phone", tracking=True)
+    email = fields.Char(string='Email', store=True, readonly=False, related="client_id.email", tracking=True)
+    ref_no = fields.Char(string="Ref No.", related="sale_enquiry_id.ref_no", tracking=True)
+    client_department_id = fields.Many2one("client.department", string="Client Department", required=False,
+                                           related="enquiry_id.client_department_id", tracking=True)
+    subject = fields.Char(string="Subject", tracking=True)
+    location = fields.Char(string="Location", tracking=True)
     gst_type = fields.Selection([
         ('gst_9', 'GST 9%'),
         ('gst_zero', 'GST Zero Rated'),
-    ], string="GST")
-
+    ], string="GST", tracking=True)
     priority = fields.Selection([
         ('low', 'Low'),
         ('medium', 'Medium'),
         ('high', 'High'),
-    ], string='Priority', tracking=False, related="enquiry_id.priority")
+    ], string='Priority', tracking=True, related="enquiry_id.priority")
     sector = fields.Selection([
         ('marine', 'Marine'),
         ('process', 'Process'),
         ('construction', 'Construction'),
         ('employment_agency', 'Employment Agency'),
-    ], string='Sector', related='client_id.sector')
+    ], string='Sector', related='client_id.sector', tracking=True)
     company_id = fields.Many2one('res.company', string='Company', required=False, index=True,
-                                 related='client_id.company_id', store=True)
-    enq_probability = fields.Float(string='Probability (%)', related="enquiry_id.enq_probability")
-    deadline = fields.Datetime(string="Deadline & Time", related='sale_enquiry_id.deadline')
-    project_id = fields.Many2one('project.project', string='Project', required=False)
-    project_number = fields.Char(string='Project Number', required=False, related="project_id.project_ref")
-    project_name = fields.Char(string="Project Name", related='project_id.name')
-    vessel_name = fields.Char(string="Vessel Name", related="project_id.name")
-    currency_id = fields.Many2one('res.currency', string='Currency',default=lambda self: self.env.company.currency_id.id)
-    service_amount = fields.Monetary(string="Total", store=True, compute='_compute_service_amounts', tracking=5)
-    discount_percent = fields.Float(string="Discount (%)", default=0.0)
-    discount_amt = fields.Float(string="Discount Amt", store=True)
-    total_discount_amount = fields.Monetary(string="Total Discount Amount", compute="_compute_service_amounts", store=True)
-    amount_after_discount = fields.Monetary(string="Less Discount", compute="_compute_service_amounts", store=True)
-    gst_amount = fields.Monetary(string="GST Amount", compute="_compute_service_amounts", store=True)
-    net_amount = fields.Monetary(string="Net Amount", compute="_compute_service_amounts", store=True)
+                                 related='client_id.company_id', store=True, tracking=True)
+    enq_probability = fields.Float(string='Probability (%)', related="enquiry_id.enq_probability", tracking=True)
+    deadline = fields.Datetime(string="Deadline & Time", related='sale_enquiry_id.deadline', tracking=True)
+    project_id = fields.Many2one('project.project', string='Project', required=False, tracking=True)
+    project_number = fields.Char(string='Project Number', required=False, related="project_id.project_ref",
+                                 tracking=True)
+    project_name = fields.Char(string="Project Name", related='project_id.name', tracking=True)
+    vessel_name = fields.Char(string="Vessel Name", related="project_id.name", tracking=True)
+    currency_id = fields.Many2one('res.currency', string='Currency',
+                                  default=lambda self: self.env.company.currency_id.id, tracking=True)
+    service_amount = fields.Monetary(string="Total", store=True, compute='_compute_service_amounts', tracking=True)
+    discount_percent = fields.Float(string="Discount (%)", default=0.0, tracking=True)
+    discount_amt = fields.Float(string="Discount Amt", store=True, tracking=True)
+    total_discount_amount = fields.Monetary(string="Total Discount Amount", compute="_compute_service_amounts",
+                                            store=True, tracking=True)
+    amount_after_discount = fields.Monetary(string="Less Discount", compute="_compute_service_amounts", store=True,
+                                            tracking=True)
+    gst_amount = fields.Monetary(string="GST Amount", compute="_compute_service_amounts", store=True, tracking=True)
+    net_amount = fields.Monetary(string="Net Amount", compute="_compute_service_amounts", store=True, tracking=True)
     gst_percent = fields.Selection([
         ('9_percent', '9%'),
-    ], string="GST", default='9_percent')
-    yeard_id = fields.Many2one('res.partner', string='Yeard', domain="[('parent_id', '=', False)]", related='sale_enquiry_id.yeard_id')
-    user_id = fields.Many2one('res.users', string='Sales Person', default=lambda self: self.env.user, related='enquiry_id.user_id')
-
-    # service_lines = fields.One2many(comodel_name='service.order.line', inverse_name='order_id', string="Order Lines",copy=True, bypass_search_access=True)
-    boss_approval_required = fields.Boolean()
+    ], string="GST", default='9_percent', tracking=True)
+    yeard_id = fields.Many2one('res.partner', string='Yeard', domain="[('parent_id', '=', False)]",
+                               related='sale_enquiry_id.yeard_id', tracking=True)
+    user_id = fields.Many2one('res.users', string='Sales Person', default=lambda self: self.env.user,
+                              related='enquiry_id.user_id', tracking=True)
+    boss_approval_required = fields.Boolean(tracking=True)
     calcification = fields.Selection([
         ('client', 'Client'),
         ('shipyard', 'Shipyard'),
@@ -77,21 +81,25 @@ class SaleOrder(models.Model):
         ('process_plant', 'Process Plant'),
         ('construction', 'Construction'),
         ('power_plant', 'Power Plant'),
-    ], string='Calcification', related='enquiry_id.calcification')
-    discount_type = fields.Selection([('percent', 'Percentage'),
+    ], string='Calcification', related='enquiry_id.calcification', tracking=True)
+    discount_type = fields.Selection([
+        ('percent', 'Percentage'),
         ('amount', 'Amount'),
-    ], string="Discount Type", default='percent')
-    system = fields.Char(string="System")
-    scope = fields.Text(string="Scope")
-    net_amount_total_words = fields.Char(string="Amount total in words",compute="_compute_net_amount_total_words")
-
-    approval_state = fields.Selection([('draft', 'Draft'), ('approved', 'Approved'),('cancelled', 'Cancelled')], string="Approval Status", default='draft')
+    ], string="Discount Type", default='percent', tracking=True)
+    system = fields.Char(string="System", tracking=True)
+    scope = fields.Text(string="Scope", tracking=True)
+    net_amount_total_words = fields.Char(string="Amount total in words", compute="_compute_net_amount_total_words",
+                                         tracking=True)
+    approval_state = fields.Selection([
+        ('draft', 'Draft'),
+        ('approved', 'Approved'),
+        ('cancelled', 'Cancelled')
+    ], string="Approval Status", default='draft', tracking=True)
 
     @api.depends('net_amount', 'currency_id')
     def _compute_net_amount_total_words(self):
         for order in self:
             order.net_amount_total_words = order.currency_id.amount_to_text(order.net_amount).replace(',', '')
-            print("\n\n\n\n\n\n\n\n\n=========>>>>>>>>>>>>>>>", order.net_amount_total_words)
 
     @api.constrains('warehouse_id', 'state', 'order_line')
     def _check_warehouse(self):
@@ -118,7 +126,6 @@ class SaleOrder(models.Model):
         for rec in self:
             if rec.discount_percent > 100:
                 rec.discount_percent = False
-                print("dszfxcghjksdzxfcg", rec.discount_percent)
                 raise ValidationError("Discount cannot be greater than 100%.")
 
     @api.onchange('discount_amt')
@@ -146,19 +153,18 @@ class SaleOrder(models.Model):
                     company = self.env['res.company'].browse(company_id)
                     if company and hasattr(company, 'code') and company.code:
                         company_code = company.code
-                        print("\n\n\nCompany Code:", company_code)
+
                 dept_code = 'DEPT'
                 if dept_id:
                     dept = self.env['enquiry.department'].browse(dept_id)
                     if dept and hasattr(dept, 'code') and dept.code:
                         dept_code = dept.code
-                        print("\n\n\nDepartment Code:", dept_code)
+
                 vals['name'] = f"{company_code}-QT-{dept_code}-{current_year}-{seq_number}"
 
         return super().create(vals_list)
 
-    @api.depends('order_line.price_subtotal', 'discount_type', 'discount_percent', 'discount_amt',
-                 'gst_type')
+    @api.depends('order_line.price_subtotal', 'discount_type', 'discount_percent', 'discount_amt', 'gst_type')
     def _compute_service_amounts(self):
         for rec in self:
             total = sum(line.price_subtotal for line in rec.order_line)
@@ -172,14 +178,12 @@ class SaleOrder(models.Model):
                     rec.discount_amt = 0.0
                     raise ValidationError("❗ Discount amount cannot be greater than Total Amount!")
                 total_discount_amount = rec.discount_amt or 0.0
-                print("\n\n\n\n\n\n\n\n\n\nsdfghsadfghsdSWAEFRGTHYJASDFGHMJHTGfg", total_discount_amount)
 
             amount_after_discount = total - total_discount_amount
-
             gst_rate = 9 / 100 if rec.gst_type == 'gst_9' else 0.0
             gst_amount = amount_after_discount * gst_rate
-
             net_amount = amount_after_discount + gst_amount
+
             rec.service_amount = total
             rec.total_discount_amount = total_discount_amount
             rec.amount_after_discount = amount_after_discount
@@ -231,11 +235,9 @@ class SaleOrder(models.Model):
                     dept_code = parts[2]
                     year = parts[3]
                     seq = parts[4]
-
                     new_name = f"{company_code}-SO-{dept_code}-{year}-{seq}"
                     rec.name = new_name
 
-        # Run original confirm process
         return super(SaleOrder, self).action_confirm()
 
     def action_draft(self):
@@ -245,7 +247,7 @@ class SaleOrder(models.Model):
             'signature': False,
             'signed_by': False,
             'signed_on': False,
-            'boss_approval_required': False,  # Reset boss approval flag
+            'boss_approval_required': False,
         })
 
     def action_cancel_approval(self):
@@ -256,7 +258,7 @@ class SaleOrder(models.Model):
         return False
 
     def action_create_invoice(self):
-        """Create invoice from sale order with all custom fields and service lines"""
+        """Create invoice from sale order with all custom fields and lines"""
         self.ensure_one()
 
         if self.state != 'sale':
@@ -270,22 +272,35 @@ class SaleOrder(models.Model):
         ], limit=1)
 
         if existing_invoice:
+            # Show notification
             return {
-                'type': 'ir.actions.act_window',
-                'name': _('Customer Invoice'),
-                'res_model': 'account.move',
-                'res_id': existing_invoice.id,
-                'view_mode': 'form',
-                'target': 'current',
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Invoice Already Exists'),
+                    'message': _('An invoice has already been created for this sale order.'),
+                    'type': 'warning',
+                    'sticky': False,
+                    'next': {
+                        'type': 'ir.actions.act_window',
+                        'name': _('Customer Invoice'),
+                        'res_model': 'account.move',
+                        'res_id': existing_invoice.id,
+                        'view_mode': 'form',
+                        'target': 'current',
+                    }
+                }
             }
 
-        # Prepare invoice values (no manual name assignment here)
+        # Prepare invoice values - Transfer ALL fields from Sale Order
         invoice_vals = {
             'move_type': 'out_invoice',
-            'name': 'Draft',
             'partner_id': self.partner_id.id,
             'invoice_date': fields.Date.today(),
+            'invoice_origin': self.name,
             'sale_order_id': self.id,
+
+            # Transfer all custom fields
             'subject': self.subject,
             'location': self.location,
             'gst_type': self.gst_type,
@@ -294,35 +309,64 @@ class SaleOrder(models.Model):
             'discount_amt': self.discount_amt,
             'gst_percent': self.gst_percent,
             'currency_id': self.currency_id.id,
+            'company_id': self.company_id.id if self.company_id else self.env.company.id,
         }
 
         # Create the invoice
         invoice = self.env['account.move'].create(invoice_vals)
 
-        # # Create invoice lines from service lines
-        # for line in self.service_lines:
-        #     invoice_line_vals = {
-        #         'move_id': invoice.id,
-        #         'department_id': line.department_id.id,
-        #         'department_description': line.department_description,
-        #         'qty': line.qty,
-        #         'uom_id': line.uom_id.id if line.uom_id else False,
-        #         'cost_of_sales': line.cost_of_sales,
-        #         'remarks': line.remarks,
-        #         'service_note': line.service_note,
-        #         'service_price_unit': line.service_price_unit,
-        #         'currency_id': line.currency_id.id,
-        #     }
-        #     self.env['account.service.order.line'].create(invoice_line_vals)
+        # Create invoice lines from sale order lines
+        for line in self.order_line:
+            # Get the income account from product or fallback
+            account = line.product_id.property_account_income_id or \
+                      line.product_id.categ_id.property_account_income_categ_id
 
-        # Open the created invoice
+            if not account:
+                raise UserError(_(
+                    'Please define income account for product: %s or its category.'
+                ) % line.product_id.name)
+
+            invoice_line_vals = {
+                'move_id': invoice.id,
+                'product_id': line.product_id.id,
+                'name': line.name,
+                'quantity': line.product_uom_qty,
+                'product_uom_id': line.product_uom_id.id,
+                'price_unit': line.price_unit,
+                'discount': line.discount,
+                'account_id': account.id,
+
+                # Transfer custom fields
+                'product_description': line.product_description,
+                'remarks': line.remarks,
+                'service_note': line.service_note,
+                'uom_id': line.uom_id.id if line.uom_id else False,
+                'cost_of_sales': line.cost_of_sales,
+            }
+
+            self.env['account.move.line'].create(invoice_line_vals)
+
+        # Compute amounts after lines are created
+        invoice._compute_service_amounts()
+
+        # Show success notification and open invoice
         return {
-            'type': 'ir.actions.act_window',
-            'name': _('Customer Invoice'),
-            'res_model': 'account.move',
-            'res_id': invoice.id,
-            'view_mode': 'form',
-            'target': 'current',
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Success!'),
+                'message': _('Invoice created successfully from Sale Order %s') % self.name,
+                'type': 'success',
+                'sticky': False,
+                'next': {
+                    'type': 'ir.actions.act_window',
+                    'name': _('Customer Invoice'),
+                    'res_model': 'account.move',
+                    'res_id': invoice.id,
+                    'view_mode': 'form',
+                    'target': 'current',
+                }
+            }
         }
 
     def action_view_project(self):
@@ -338,52 +382,6 @@ class SaleOrder(models.Model):
             }
         else:
             raise UserError(_("No Project linked with this Sale Order."))
-
-
-# class ServiceOrderLine(models.Model):
-#     _name = 'service.order.line'
-#
-#     order_id = fields.Many2one(
-#         comodel_name='sale.order',
-#         string="Order Reference",
-#         required=True, ondelete='cascade', index=True, copy=False)
-#     sequence = fields.Integer(string="Sequence", default=10)
-#     department_id = fields.Many2one("enquiry.department", string="Department", required=True)
-#     department_description = fields.Char(string="Description")
-#     qty = fields.Float(string="Qty", readonly=False, required=True, precompute=True)
-#     uom_id = fields.Many2one('uom.uom',string='UOM')
-#     cost_of_sales = fields.Monetary(string="Cost of Sales")
-#     percentage = fields.Float(string="%", help="Enter percentage if applicable", compute="_compute_margin")
-#     remarks = fields.Char(string="Remarks")
-#     service_note = fields.Char(string="Note")
-#     service_price_unit = fields.Monetary(
-#         string="Amount Quotated",
-#         digits='Product Price',
-#         store=True, readonly=False, required=True, precompute=True)
-#     service_price_subtotal = fields.Monetary(
-#         string="Amount",
-#         compute='_compute_service_amount',
-#         store=True, precompute=True)
-#     currency_id = fields.Many2one('res.currency', string='Currency',
-#                                   default=lambda self: self.env.company.currency_id.id)
-#     pipe_size = fields.Char(string="Pipe Size (inch)")
-#     ins_thk = fields.Char(string="Ins thk(mm)")
-#     unit_mtr_pcs = fields.Char(string="Unit mtr/pcs")
-#
-#
-#     @api.depends('service_price_subtotal', 'cost_of_sales')
-#     def _compute_margin(self):
-#         """Compute profit percentage = ((Amount - Cost) / Cost) * 100"""
-#         for rec in self:
-#             if rec.cost_of_sales:
-#                 rec.percentage = ((rec.service_price_subtotal - rec.cost_of_sales) / rec.cost_of_sales) * 100
-#             else:
-#                 rec.percentage = 0.0
-#
-#     @api.depends('service_price_unit', 'qty')
-#     def _compute_service_amount(self):
-#         for rec in self:
-#             rec.service_price_subtotal = rec.service_price_unit * rec.qty
 
 
 class SaleOrderLine(models.Model):
@@ -404,7 +402,3 @@ class SaleOrderLine(models.Model):
                 rec.percentage = ((rec.price_subtotal - rec.cost_of_sales) / rec.cost_of_sales) * 100
             else:
                 rec.percentage = 0.0
-
-
-
-

@@ -7,8 +7,8 @@
             <xpath expr="//field[@name='employee_id']" position="before">
                 <field name="attendance_date" string="Date" options="{'numeric': true }"/>
                 <field name="project_id"/>
-                <field name="weekend_overtime_hours" widget="float_time"/>
-                <field name="weekday_overtime_hours" widget="float_time"/>
+                <field name="weekend_overtime_hours" widget="float_time" column_invisible="1"/>
+                <field name="weekday_overtime_hours" widget="float_time" column_invisible="1"/>
             </xpath>
             <xpath expr="//field[@name='check_out']" position="after">
                 <field name="create_date" column_invisible="1"/>
@@ -33,8 +33,8 @@
 
             <!-- Add our new fields BEFORE the "Working Time / Results / Hours" section -->
             <xpath expr="//group[@name='resource_working_hours']" position="inside">
-                    <field name="mon_to_fri_hours"/>
-                    <field name="saturday_hours"/>
+                    <field name="mon_to_fri_hours" invisible="0"/>
+                    <field name="saturday_hours" invisible="0"/>
             </xpath>
 
 <!--            <field name="hours_per_day" position="replace">-->

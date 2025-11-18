@@ -57,9 +57,9 @@
                         <field name="client_department_id"/>
                         <field name="ref_no"/>
                     </group>
-<!--                    <group string="Cancel Reason">-->
-<!--                        <field name="cancel_reason" invisible="not cancel_reason"/>-->
-<!--                    </group>-->
+                    <group string="Cancel Reason">
+                        <field name="cancel_reason" invisible="not cancel_reason"/>
+                    </group>
                 </group>
             </xpath>
 

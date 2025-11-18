@@ -56,31 +56,47 @@
 <!--                    <attribute name="invisible">1</attribute>-->
 <!--                </xpath>-->
 
-                <xpath expr="//button[@name='button_cancel']" position="after">
-                    <button name="action_confirm_invoice"
-                        string="Confirm"
-                        type="object"
-                        class="btn-primary"
-                        invisible="hide_post_button or move_type == 'entry' or display_inactive_currency_warning"/>
-                </xpath>
-
-                <xpath expr="//page[@id='invoice_tab']" position="after">
-                    <page string="Service Lines">
-                        <field name="account_service_lines">
-                            <list editable="bottom">
-                                <field name="department_id"/>
-                                <field name="department_description"/>
-                                <field name="qty"/>
-                                <field name="uom_id"/>
-                                <field name="cost_of_sales"/>
-                                <field name="service_price_unit"/>
-                                <field name="service_price_subtotal" readonly="1"/>
-                                <field name="percentage" readonly="1"/>
-                                <field name="remarks"/>
-                                <field name="service_note"/>
-                            </list>
-                        </field>
-                         <group class="oe_subtotal_footer">
+<!--                <xpath expr="//button[@name='button_cancel']" position="after">-->
+<!--                    <button name="action_confirm_invoice"-->
+<!--                        string="Confirm"-->
+<!--                        type="object"-->
+<!--                        class="btn-primary"-->
+<!--                        invisible="hide_post_button or move_type == 'entry' or display_inactive_currency_warning"/>-->
+<!--                </xpath>-->
+                     <xpath expr="//page[@name='invoice_tab']" position="after">
+                        <page name="services" string="Item">
+                        <group>
+                            <field name="invoice_line_ids" nolabel="1" groups="custom_unique.group_unique_user">
+                                <list editable="bottom">
+                                    <field name="product_id" string="Department" domain="[('type', '=', 'service')]"/>
+                                    <field name="product_description"/>
+                                    <field name="quantity" string="Qty"/>
+                                    <field name="uom_id"/>
+                                    <field name="price_unit" string="Amount Quotated"/>
+                                    <field name="price_subtotal" string="Amount"/>
+                                    <field name="cost_of_sales"/>
+                                    <field name="percentage"/>
+                                    <field name="remarks"/>
+                                    <field name="service_note"/>
+                                </list>
+                            </field>
+                            <field name="invoice_line_ids" nolabel="1" groups="custom_unique.group_unique_administrator">
+                                <list editable="bottom">
+                                    <field name="product_id" string="Department" domain="[('type', '=', 'service')]"/>
+                                    <field name="product_description"/>
+                                    <field name="quantity" string="Qty"/>
+                                    <field name="uom_id"/>
+                                    <field name="price_unit" string="Amount Quotated"/>
+                                    <field name="price_subtotal" string="Amount"/>
+                                    <field name="cost_of_sales"/>
+                                    <field name="percentage"/>
+                                    <field name="remarks"/>
+                                    <field name="service_note"/>
+                                </list>
+                            </field>
+<!--                            <field name="note" nolabel="1" placeholder="Terms and conditions..."/>-->
+                        </group>
+                        <group class="oe_subtotal_footer">
                             <field name="service_amount" string="Total"/>
 
                             <label for="discount_percent" string="Discount"/>

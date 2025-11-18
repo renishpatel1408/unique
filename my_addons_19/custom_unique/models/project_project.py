@@ -10,26 +10,30 @@ from pygments.lexer import default
 class ProjectProject(models.Model):
     _inherit = 'project.project'
 
-    project_ref = fields.Char(string="Project No.", readonly=True, copy=False, index=True, default='New')
-    sale_order_id = fields.Many2one('sale.order', string='Quotation', store=True,  readonly=False)
-    department_id = fields.Many2one("enquiry.department", string="Department", related="sale_order_id.department_id",  readonly=False, store=True)
-    start_date = fields.Datetime(string="Start Date", readonly=False)
-    end_date = fields.Datetime(string="End Date", readonly=False)
-    yeard_id = fields.Many2one('res.partner', string='Yard', domain="[('parent_id', '=', False)]", related="sale_order_id.yeard_id", readonly=False)
-    quotation_date = fields.Datetime(string="Quotation Date", related="sale_order_id.date_order", readonly=False)
+    project_ref = fields.Char(string="Project No.", readonly=True, copy=False, index=True, default='New', tracking=True)
+    sale_order_id = fields.Many2one('sale.order', string='Quotation', store=True, readonly=False, tracking=True)
+    department_id = fields.Many2one("enquiry.department", string="Department", related="sale_order_id.department_id",
+                                    readonly=False, store=True, tracking=True)
+    start_date = fields.Datetime(string="Start Date", readonly=False, tracking=True)
+    end_date = fields.Datetime(string="End Date", readonly=False, tracking=True)
+    yeard_id = fields.Many2one('res.partner', string='Yard', domain="[('parent_id', '=', False)]",
+                               related="sale_order_id.yeard_id", readonly=False, tracking=True)
+    quotation_date = fields.Datetime(string="Quotation Date", related="sale_order_id.date_order", readonly=False,
+                                     tracking=True)
     client_id = fields.Many2one('res.partner', string='Company Name', domain="[('parent_id', '=', False)]",
-                                related="sale_order_id.client_id", readonly=False, store=True)
+                                related="sale_order_id.client_id", readonly=False, store=True, tracking=True)
     contact_person_id = fields.Many2one('res.partner', string='Contact Name', domain="[('parent_id', '=', client_id)]",
-                                        related="sale_order_id.contact_person_id", readonly=False, store=True)
+                                        related="sale_order_id.contact_person_id", readonly=False, store=True,
+                                        tracking=True)
     mobile = fields.Char(string="Contact No.", readonly=False,
                          help="Enter multiple mobile numbers separated by commas or new lines.",
-                         related="client_id.phone")
-    email = fields.Char(string='Email', store=True, readonly=False, related="client_id.email")
-    ref_no = fields.Char(string="Ref No.", related="sale_order_id.ref_no",readonly=False)
+                         related="client_id.phone", tracking=True)
+    email = fields.Char(string='Email', store=True, readonly=False, related="client_id.email", tracking=True)
+    ref_no = fields.Char(string="Ref No.", related="sale_order_id.ref_no", readonly=False, tracking=True)
     client_department_id = fields.Many2one("client.department", string="Client Department",
-                                           related="sale_order_id.client_department_id", readonly=False, store=True)
-    purchase_id = fields.Many2one('purchase.order', string='Purchase No.', readonly=False)
-
+                                           related="sale_order_id.client_department_id", readonly=False, store=True,
+                                           tracking=True)
+    purchase_id = fields.Many2one('purchase.order', string='Purchase No.', readonly=False, tracking=True)
     calcification = fields.Selection([
         ('client', 'Client'),
         ('shipyard', 'Shipyard'),
@@ -39,34 +43,38 @@ class ProjectProject(models.Model):
         ('process_plant', 'Process Plant'),
         ('construction', 'Construction'),
         ('power_plant', 'Power Plant'),
-        ('power_plant', 'Power Plant'),
-    ], string='Calcification', related='sale_order_id.calcification', readonly=False)
-
+    ], string='Calcification', related='sale_order_id.calcification', readonly=False, tracking=True)
     priority = fields.Selection([
         ('low', 'Low'),
         ('medium', 'Medium'),
         ('high', 'High'),
     ], string='Priority', tracking=True, related='sale_order_id.priority', readonly=False)
-
     user_id = fields.Many2one('res.users', string='Sales Person', default=lambda self: self.env.user,
-                              related='sale_order_id.user_id', readonly=False)
-    enq_probability = fields.Float(string='Probability (%)', default=1, related='sale_order_id.enq_probability', readonly=False)
+                              related='sale_order_id.user_id', readonly=False, tracking=True)
+    enq_probability = fields.Float(string='Probability (%)', default=1, related='sale_order_id.enq_probability',
+                                   readonly=False, tracking=True)
     sector = fields.Selection([
         ('marine', 'Marine'),
         ('process', 'Process'),
         ('construction', 'Construction'),
         ('employment_agency', 'Employment Agency'),
-    ], string='Sector', related='client_id.sector', readonly=False)
-    company_id = fields.Many2one('res.company', string='Company', index=True, related="client_id.company_id", readonly=False)
-
-    deadline = fields.Datetime(string="Deadline & Time", related="sale_order_id.deadline", readonly=False)
-    vessel_name = fields.Char(string="Vessel Name", related="sale_order_id.vessel_name", readonly=False)
-    state = fields.Selection([('active', 'Active'), ('cancel', 'Cancelled')], string='Status', tracking=True, readonly=False, default='active')
-    estimation_line_ids = fields.One2many('project.estimation.line', 'project_id',string='Lines', readonly=False)
-    employee_ids = fields.One2many('project.employee', 'project_id',string='Employee Details', readonly=False)
-    project_complete_percent = fields.Float(string='Project compliance %', readonly=False, default=0.0)
-    location = fields.Char(string="Location", related="sale_order_id.location")
-    # cancel_reason = fields.Text(string="Reason")
+    ], string='Sector', related='client_id.sector', readonly=False, tracking=True)
+    company_id = fields.Many2one('res.company', string='Company', index=True, related="client_id.company_id",
+                                 readonly=False, tracking=True)
+    deadline = fields.Datetime(string="Deadline & Time", related="sale_order_id.deadline", readonly=False,
+                               tracking=True)
+    vessel_name = fields.Char(string="Vessel Name", related="sale_order_id.vessel_name", readonly=False, tracking=True)
+    state = fields.Selection([
+        ('active', 'Active'),
+        ('cancel', 'Cancelled')
+    ], string='Status', tracking=True, readonly=False, default='active')
+    estimation_line_ids = fields.One2many('project.estimation.line', 'project_id', string='Lines', readonly=False,
+                                          tracking=True)
+    employee_ids = fields.One2many('project.employee', 'project_id', string='Employee Details', readonly=False,
+                                   tracking=True)
+    project_complete_percent = fields.Float(string='Project compliance %', readonly=False, default=0.0, tracking=True)
+    location = fields.Char(string="Location", related="sale_order_id.location", tracking=True)
+    cancel_reason = fields.Text(string="Reason", tracking=True)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -103,23 +111,27 @@ class ProjectEstimationLine(models.Model):
     _description = 'Project Estimation Line'
     _order = 'id asc'
 
-    project_id = fields.Many2one('project.project', string='Project', ondelete='cascade')
-    estimate_man_hrs = fields.Monetary(string='Estimate Man Hrs')
-    rate_per_hr = fields.Monetary(string='Rate per Hour')
-    est_man_power_cost = fields.Monetary(string='Est. Man Power Cost', compute='_compute_est_man_power_cost', store=True)
-    est_dia_weight_uom = fields.Char(string='Est. DIA / Weight UOM')
-    po_amount = fields.Monetary(string='P.O Amount')
-    vor_not_approved = fields.Monetary(string='VOR / Not Approved')
-    total_project_value = fields.Monetary(string='Total Project Value')
-    total_project_value_2 = fields.Monetary(string='Total Project Value 2', compute='_compute_total_project_values', store=True)
-    percent_completed = fields.Float(string='% Completed')
-    wip_value = fields.Monetary(string='WIP Value', compute='_compute_total_project_values', store=True)
-    percent_pending = fields.Float(string='% Pending', compute='_compute_percent_calculation', store=True)
-    pending_amount = fields.Monetary(string='Pending Amount', compute='_compute_percent_calculation', store=True)
-    expected_closing_date = fields.Date(string='Expected Closing Date of the Job')
+    project_id = fields.Many2one('project.project', string='Project', ondelete='cascade', tracking=True)
+    estimate_man_hrs = fields.Monetary(string='Estimate Man Hrs', tracking=True)
+    rate_per_hr = fields.Monetary(string='Rate per Hour', tracking=True)
+    est_man_power_cost = fields.Monetary(string='Est. Man Power Cost', compute='_compute_est_man_power_cost',
+                                         store=True, tracking=True)
+    est_dia_weight_uom = fields.Char(string='Est. DIA / Weight UOM', tracking=True)
+    po_amount = fields.Monetary(string='P.O Amount', tracking=True)
+    vor_not_approved = fields.Monetary(string='VOR / Not Approved', tracking=True)
+    total_project_value = fields.Monetary(string='Total Project Value', tracking=True)
+    total_project_value_2 = fields.Monetary(string='Total Project Value 2', compute='_compute_total_project_values',
+                                            store=True, tracking=True)
+    percent_completed = fields.Float(string='% Completed', tracking=True)
+    wip_value = fields.Monetary(string='WIP Value', compute='_compute_total_project_values', store=True, tracking=True)
+    percent_pending = fields.Float(string='% Pending', compute='_compute_percent_calculation', store=True,
+                                   tracking=True)
+    pending_amount = fields.Monetary(string='Pending Amount', compute='_compute_percent_calculation', store=True,
+                                     tracking=True)
+    expected_closing_date = fields.Date(string='Expected Closing Date of the Job', tracking=True)
     currency_id = fields.Many2one('res.currency', string='Currency',
-                                  default=lambda self: self.env.company.currency_id.id)
-    working_date = fields.Date(string="Work Date")
+                                  default=lambda self: self.env.company.currency_id.id, tracking=True)
+    working_date = fields.Date(string="Work Date", tracking=True)
 
     @api.depends('estimate_man_hrs', 'rate_per_hr')
     def _compute_est_man_power_cost(self):
@@ -177,19 +189,20 @@ class ProjectEmployee(models.Model):
     _name = 'project.employee'
     _description = 'Project Employee'
 
-    project_id = fields.Many2one('project.project', string='Project', ondelete='cascade')
-    employee_id = fields.Many2one('hr.employee', string='Employee')
-    working_dept = fields.Many2one('hr.department', string='Working Dept', related="employee_id.department_id")
-    designation_id = fields.Many2one('hr.job', related="employee_id.job_id", string="Designation")
+    project_id = fields.Many2one('project.project', string='Project', ondelete='cascade', tracking=True)
+    employee_id = fields.Many2one('hr.employee', string='Employee', tracking=True)
+    working_dept = fields.Many2one('hr.department', string='Working Dept', related="employee_id.department_id",
+                                   tracking=True)
+    designation_id = fields.Many2one('hr.job', related="employee_id.job_id", string="Designation", tracking=True)
     sector = fields.Selection([
         ('marine', 'Marine'),
         ('process', 'Process'),
         ('construction', 'Construction'),
         ('employment_agency', 'Employment Agency'),
-    ], string='Sector', related='employee_id.sector')
-    employee_code = fields.Char(string='Employee Code', related="employee_id.code")
-    location = fields.Char(string="Location", related="project_id.location", readonly=False)
-    employee_total_work = fields.Float(string="Worked Hours")
+    ], string='Sector', related='employee_id.sector', tracking=True)
+    employee_code = fields.Char(string='Employee Code', related="employee_id.code", tracking=True)
+    location = fields.Char(string="Location", related="project_id.location", readonly=False, tracking=True)
+    employee_total_work = fields.Float(string="Worked Hours", tracking=True)
 
 
 

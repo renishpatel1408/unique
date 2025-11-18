@@ -270,7 +270,7 @@
                                     Director<br/>
                                     <t t-if="doc.company_id"> <t t-esc="doc.company_id.name"/></t><br/>
                                     Email: <t t-if="boss_users.email"> <t t-esc="boss_users.email"/></t><br/>
-                                    H/P: <t t-if="boss_users.phone"> <t t-esc="boss_users.phone"/></t><br/>
+                                    H/P: <t t-if="boss_users.hp_number"> <t t-esc="boss_users.hp_number"/></t><br/>
                                     Office: <t t-if="boss_users.phone"> <t t-esc="boss_users.phone"/></t>
                                 </strong>
                             </div>

@@ -20,6 +20,13 @@
             <xpath expr="//field[@name='signature']" position="after">
                 <field name="is_boss"/>
             </xpath>
+
+            <xpath expr="//div[contains(@class,'oe_title')]" position="inside">
+                <h5 name="h5_hp" class="d-flex align-items-baseline mb-0">
+                    <i class="fa fa-fw fa-phone me-1 text-primary" title="HP Number"/>
+                    <field name="hp_number" placeholder="HP Number" class="w-75"/>
+                </h5>
+            </xpath>
         </field>
     </record>
 
@@ -29,6 +36,13 @@
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
 
+<!--            <xpath expr="//sheet" position="before">-->
+<!--                <header>-->
+<!--                    <button name="action_approve_partner" string="Approve" type="object" class="btn-primary" invisible="confirmation_state or not is_approved_required_from_boss" groups="custom_unique.group_unique_administrator" confirm="Are you sure you want to approve this partner?"/>-->
+<!--                    <button name="action_reject_partner" string="Reject" type="object" class="btn-primary" invisible="confirmation_state or not is_approved_required_from_boss" groups="custom_unique.group_unique_administrator" confirm="Are you sure you want to reject this partner?"/>-->
+<!--                    <field name="confirmation_state" widget="statusbar" statusbar_visible="approved,rejected" invisible="confirmation_state" groups="custom_unique.group_unique_administrator"/>-->
+<!--                </header>-->
+<!--            </xpath>-->
 
             <xpath expr="//field[@name='vat']" position="before">
                 <field name="create_date" widget="datetime" options="{'numeric': true }"/>
@@ -56,7 +70,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='application_statistics']" position="after">
                 <field name="confirmation_state" decoration-success="confirmation_state == 'approved'"
-                    decoration-danger="confirmation_state == 'reject'"
+                    decoration-danger="confirmation_state == 'rejected'"
                     widget="badge"/>
             </xpath>
         </field>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <menuitem id="menu_unique_root" name="GOM" sequence="1"/>
+    <menuitem id="menu_unique_root" name="Unique" sequence="1"/>
 
     <menuitem id="menu_enquiry_lead" name="Lead" parent="menu_unique_root" sequence="1" action="action_enquiry_lead"/>
 
